@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "mcp__memory-bank-v05__work_on_pwd",
+      "WebSearch",
+      "Bash(ssh:*)",
+      "mcp__memory-bank-v05__save_document",
+      "Bash(ping:*)",
+      "Bash(scp:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "mcp__memory-bank-v05__save_session_context",
+      "mcp__memory-bank-v05__update_document",
+      "mcp__memory-bank-v05__search_documents",
+      "mcp__memory-bank-v05__extract_full_document",
+      "mcp__memory-bank-v05__get_status",
+      "WebFetch(domain:github.com)",
+      "mcp__memory-bank-v05__save_plan",
+      "WebFetch(domain:www.mediawiki.org)",
+      "mcp__memory-bank-v05__agent_query_database",
+      "mcp__memory-bank-v05__agent_describe_table",
+      "mcp__memory-bank-v05__save_decision",
+      "Bash(python3:*)",
+      "mcp__memory-bank-v05__get_search_statistics",
+      "mcp__memory-bank-v05__search_by_importance",
+      "WebFetch(domain:www.semantic-mediawiki.org)",
+      "Bash(chmod:*)",
+      "Bash(/tmp/manage_properties.sh)",
+      "mcp__memory-bank-v05__search_by_timestamp",
+      "WebFetch(domain:192.168.1.18)",
+      "mcp__memory-bank-v05__load_latest_context",
+      "Bash(EOF)",
+      "Bash(/tmp/mediawiki_login.sh \")",
+      "Bash(PGPASSWORD='rash4z4m!' psql:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "memory-bank"
+  ]
+}
