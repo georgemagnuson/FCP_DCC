@@ -1,8 +1,8 @@
 # FCP_DCC Quick Reference
 
 **Project:** Food Control Plan Compliance Documentation & Diary System
-**Last Updated:** 2026-01-15
-**Status:** Core infrastructure operational, MediaWiki templates production ready
+**Last Updated:** 2026-01-27
+**Status:** Core infrastructure fully operational, Dark Blue sections documented and ready for implementation
 
 ---
 
@@ -43,10 +43,10 @@ ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
 ```
 
 **SSH Keys:** `~/.ssh/id_rsa` (confirmed working) or `~/.ssh/id_rsa-remote-ssh`
-**Status:** ✅ All servers accessible (tested 2026-01-15)
-**Uptime:** 33+ days on all jails
+**Status:** ✅ All servers accessible (tested 2026-01-27)
 **User:** `georgemagnuson`
 **Port:** 22 (standard)
+**PostgreSQL Access:** Verified from local machine using .env credentials
 
 ---
 
@@ -68,11 +68,11 @@ ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
 
 ```bash
 # Connect from local machine (if on network)
-psql -U mediawiki -d mediawiki -h 192.168.2.30 -p 5432
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -p 5432
 
 # Connect from within postgresqljail
 ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
-psql -U mediawiki -d mediawiki
+psql -U postgres -d mediawiki
 ```
 
 ### Databases & Credentials
@@ -160,20 +160,23 @@ php /usr/local/www/mediawiki/maintenance/update.php
 
 ```bash
 # List all databases
-psql -U postgres -h 192.168.2.30 -l
+PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -l
 
 # List tables in mediawiki database
-psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "\dt"
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "\dt"
 
 # List SMW properties
-psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids WHERE smw_iw = '' LIMIT 20;"
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT * FROM mediawiki.smw_object_ids WHERE smw_iw = '' LIMIT 20;"
+
+# Query FCP pages
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawiki.page WHERE page_title LIKE 'FCP%' ORDER BY page_title;"
 ```
 
 ---
 
 ## Current Project Status
 
-### ✅ Completed (as of 2026-01-15)
+### ✅ Completed (as of 2026-01-27)
 
 **MediaWiki Implementation:**
 - Template:BusinessDetails - Production ready with conditional display
@@ -182,28 +185,38 @@ psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids 
 - 2 business pages created (The Jitsu Ltd)
 - Category cleanup completed
 
+**Dark Blue Sections Documentation:**
+- Sections 4-11 fully documented and ready for MediaWiki implementation (created 2026-01-26)
+- Complete specifications for: Business Layout, Risk Management, Taking Responsibility, Plan Monitoring, Training & Competency, Equipment & Facilities, Water Supply (Registered), Water Supply (Self-Supply)
+- SMW properties identified for each section
+- Forms and templates designed
+
 **Infrastructure:**
-- PostgreSQL on postgresjail fully operational
-- MediaWiki + Semantic MediaWiki + PageForms configured
+- PostgreSQL 17.0 on postgresqljail fully operational
+- MediaWiki 1.43.5 + SMW + PageForms + ParserFunctions fully configured
+- Database schema up-to-date and verified
 - Wiki.js deployed and connected to PostgreSQL
 - Django BI application stable and operational
+- Apache 2.4 running on llamajail with all services operational
 
 ### 🔄 In Progress
 
-- Business details schema implementation (pages 7-10)
+- Implementing Dark Blue sections (4-11) as MediaWiki pages
 - Additional business page entries
 - Daily report templates
 - User permissions and access control
 
 ### 📋 Planned Next Steps
 
-1. Add more FCP business pages
-2. Create SMW query dashboards for business search/filtering
-3. Implement form validation for business activities
-4. Add business logo/image upload capability
-5. Build compliance reporting dashboards
-6. Configure daily report submission workflow
-7. Set up inspector access and review features
+1. **HIGH PRIORITY:** Create 8 Dark Blue section pages (FCP:Setting_Up:Business_layout, Risk_management, Responsibility, Plan_monitoring, Training_competency, Equipment_facilities, Water_supply_registered, Water_supply_self_supply)
+2. Create forms for Business layout uploads, Risk management tables, Water testing records
+3. Add SMW properties: responsible_person, water_supplier_name, water_test_results, equipment_list, nearby_risks
+4. Create SMW query dashboards for business search/filtering
+5. Implement form validation for business activities
+6. Add business logo/image upload capability
+7. Build compliance reporting dashboards
+8. Configure daily report submission workflow
+9. Set up inspector access and review features
 
 ---
 
@@ -226,6 +239,21 @@ psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids 
 - **Configuration:** Enabled in LocalSettings.php
 - **Documentation:** https://www.mediawiki.org/wiki/Extension:ParserFunctions
 
+### SubpageNavigation
+- **Purpose:** Automatic page navigation for subpages
+- **Usage:** Hierarchical page organization with breadcrumb navigation
+- **Status:** Enabled and active
+
+### Echo
+- **Purpose:** User notifications system
+- **Usage:** Alerts for page changes, user interactions
+- **Status:** Enabled and active
+
+### CategoryTree
+- **Purpose:** Display category contents as expandable tree
+- **Usage:** Interactive category browsing and navigation
+- **Status:** Enabled and active
+
 ---
 
 ## FCP Color Scheme
@@ -246,11 +274,17 @@ psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids 
 ## Memory Bank
 
 **Database Location:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/memory-bank/context.db`
-**Document Count:** 79 documents
+**Document Count:** 102 documents
 **Schema Version:** v2.1
+
+### Key Documents
+- **Dark Blue Remaining Sections** (2026-01-26) - Complete specifications for FCP Sections 4-11, ready for MediaWiki implementation
+- **MediaWiki Pages Inventory** (2026-01-26) - Status of all FCP translation pages
+- **MediaWiki Dark Blue Section - Conformance Review** (2026-01-19) - Final verification of Business Details implementation
 
 ### Quick Searches
 ```
+- "dark blue" - Section specifications and implementation status
 - "state of project" - Project overview and status
 - "network topology" - Complete infrastructure details
 - "page forms" - MediaWiki extension guides
@@ -288,11 +322,14 @@ psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids 
 - All systems use FreeBSD with jail infrastructure
 - Key-based SSH authentication only (no password login)
 - PostgreSQL database at 192.168.2.30 is primary data store
-- MediaWiki uses both file storage and database
-- Semantic properties stored in `smw_*` tables
-- Template cache requires manual purging after changes
+- MediaWiki uses both file storage and database in `mediawiki` schema (not `public`)
+- MediaWiki database user is `postgres` (superuser)
+- Semantic properties stored in `mediawiki.smw_*` tables
+- Template cache requires manual purging after changes: `php maintenance/purgeList.php --db-touch`
+- Database schema auto-maintained by MediaWiki update script
 - Color scheme supports accessibility standards
 - OpenVPN tunnel connects JITSU to ASTEROID M for DB access
+- All jails configured with persistent storage and auto-start on reboot
 
 ---
 
@@ -301,4 +338,4 @@ psql -U mediawiki -d mediawiki -h 192.168.2.30 -c "SELECT * FROM smw_object_ids 
 **Project Owner:** George Magnuson
 **Local Dev Path:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/`
 **Documentation:** CLAUDE.md in project root
-**Memory Bank:** 79+ documents covering architecture, guides, and decisions
+**Memory Bank:** 102 documents covering architecture, guides, specifications, and implementation status

@@ -35,7 +35,17 @@
       "Bash(PGPASSWORD='rash4z4m!' psql:*)",
       "Bash(git init:*)",
       "Bash(git config:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo create:*)",
+      "Bash(gh repo list:*)",
+      "Bash(psql:*)",
+      "Bash(/tmp/create_dark_blue_pages.sh:*)",
+      "WebFetch(domain:192.168.2.10)",
+      "Bash(PGPASSWORD=\"rash4z4m!\" psql:*)",
+      "Bash(ls:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
