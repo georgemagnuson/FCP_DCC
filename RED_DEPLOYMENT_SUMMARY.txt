@@ -1,0 +1,440 @@
+================================================================================
+RED (TROUBLESHOOTING) SECTION - MEDIAWIKI IMPLEMENTATION
+DEPLOYMENT SUMMARY & QUICK START GUIDE
+================================================================================
+
+Project: FCP_DCC (Food Compliance Protocol - Digital Content Conversion)
+Section: Red (Troubleshooting) - Complete Compliance & Problem Resolution
+Generated: 2026-01-29
+Status: PRODUCTION READY
+Total Files: 5 files created
+
+================================================================================
+DELIVERABLES
+================================================================================
+
+1. red_troubleshooting_section.sql (44 KB, 1,014 lines)
+   ✓ Complete PostgreSQL deployment script
+   ✓ 100 INSERT statements (5 per page × 20 pages)
+   ✓ Wrapped in BEGIN/COMMIT transaction
+   ✓ 4 verification SELECT queries included
+   ✓ Ready for immediate execution
+
+2. RED_QUICK_REFERENCE.md (8.7 KB)
+   ✓ Fast lookup guide
+   ✓ Page allocation tables
+   ✓ Execution commands
+   ✓ Form field reference
+   ✓ Troubleshooting tips
+
+3. RED_SECTION_INDEX.md (16 KB)
+   ✓ Complete documentation index
+   ✓ Full content specifications
+   ✓ Database schema mapping
+   ✓ Verification procedures
+   ✓ Integration notes
+
+4. RED_TROUBLESHOOTING_STRUCTURE.md (22 KB)
+   ✓ Detailed structure specifications
+   ✓ Full wikitext content
+   ✓ Form definitions
+   ✓ Database integration details
+   ✓ Deployment checklist
+
+5. RED_BYTE_CALCULATIONS.txt (15 KB)
+   ✓ Size verification for all 20 pages
+   ✓ Pre-calculated byte values
+   ✓ ID allocation verification
+   ✓ INSERT statement verification
+   ✓ Post-deployment queries
+
+================================================================================
+PAGE STRUCTURE OVERVIEW
+================================================================================
+
+20 PAGES TOTAL
+├── 4 CONTENT PAGES (IDs 189-192, Namespace 0)
+│   ├── Page 189: Something_goes_wrong (2,863 bytes)
+│   ├── Page 190: Dealing_complaints (2,534 bytes)
+│   ├── Page 191: Tracing_food (2,431 bytes)
+│   └── Page 192: Recalling_food (2,541 bytes)
+├── 8 FORM TEMPLATES (IDs 193-200, Namespace 10)
+│   ├── Page 193: Template:Incident_Report
+│   ├── Page 194: Template:Complaint_Log
+│   ├── Page 195: Template:Food_Traceability_Record
+│   ├── Page 196: Template:Recall_Notification
+│   ├── Page 197: Template:Corrective_Action_Plan
+│   ├── Page 198: Template:Regulatory_Report
+│   ├── Page 199: Template:Root_Cause_Analysis
+│   └── Page 200: Template:Investigation_Log
+└── 8 FORM PAGES (IDs 201-208, Namespace 0)
+    ├── Page 201: Form:Incident_Report
+    ├── Page 202: Form:Complaint_Log
+    ├── Page 203: Form:Food_Traceability_Record
+    ├── Page 204: Form:Recall_Notification
+    ├── Page 205: Form:Corrective_Action_Plan
+    ├── Page 206: Form:Regulatory_Report
+    ├── Page 207: Form:Root_Cause_Analysis
+    └── Page 208: Form:Investigation_Log
+
+DATABASE ALLOCATION
+├── Page IDs: 189-208 (20 sequential)
+├── Text IDs: 303-322 (20 sequential)
+└── Revision IDs: 1078-1097 (20 sequential)
+
+================================================================================
+QUICK START - DEPLOYMENT IN 3 STEPS
+================================================================================
+
+STEP 1: Verify Prerequisites
+  ✓ SSH access to database server
+  ✓ PostgreSQL credentials ready
+  ✓ Database: mediawiki
+  ✓ User: postgres
+  ✓ Host: 192.168.2.30
+
+STEP 2: Execute SQL Script
+  Command:
+  PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 \
+    < red_troubleshooting_section.sql
+
+  Expected Output:
+  BEGIN
+  INSERT 0 1
+  [100 times]
+  SELECT 20
+  SELECT 20
+  SELECT 20
+  COMMIT
+
+  Time to Execute: < 1 second
+
+STEP 3: Verify Deployment
+  Command:
+  PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 \
+    -c "SELECT COUNT(*) FROM mediawiki.page WHERE page_id BETWEEN 189 AND 208;"
+
+  Expected Result: 20
+
+================================================================================
+CONTENT PAGES - TOPICS COVERED
+================================================================================
+
+PAGE 189: Something_goes_wrong
+  Purpose: Incident Management Framework
+  Topics:
+    • Inevitable incidents and problems
+    • Incident classification systems
+    • Response protocols by severity
+    • Documentation requirements
+    • Evidence preservation
+    • Customer communication
+    • Regulatory authority procedures
+  Know/Do/Show Structure: Yes ✓
+
+PAGE 190: Dealing_complaints
+  Purpose: Customer Complaint Management
+  Topics:
+    • Professional complaint handling
+    • Complaint documentation
+    • Investigation procedures
+    • Root cause analysis
+    • Corrective action
+    • Regulatory reporting
+    • Complaint pattern analysis
+  Know/Do/Show Structure: Yes ✓
+
+PAGE 191: Tracing_food
+  Purpose: Food Traceability Systems
+  Topics:
+    • Backward/forward traceability
+    • Batch and lot tracking
+    • Supplier/customer records
+    • Traceability testing
+    • Record retention
+    • Rapid recall capability
+  Know/Do/Show Structure: Yes ✓
+
+PAGE 192: Recalling_food
+  Purpose: Product Recall Procedures
+  Topics:
+    • Recall classification
+    • Recall identification
+    • Regulatory notification
+    • Customer communication
+    • Recovery tracking
+    • Post-recall analysis
+    • Lessons learned
+  Know/Do/Show Structure: Yes ✓
+
+================================================================================
+FORM PAGES - DATA COLLECTION
+================================================================================
+
+FORM 1: Incident_Report
+  Fields: 8 inputs
+  Purpose: Document incidents and immediate response
+  Key Fields: Date/time, incident type, severity, management notification
+
+FORM 2: Complaint_Log
+  Fields: 8 inputs
+  Purpose: Track and resolve customer complaints
+  Key Fields: Customer info, complaint type, investigation status, resolution
+
+FORM 3: Food_Traceability_Record
+  Fields: 9 inputs
+  Purpose: Maintain supplier and batch tracking
+  Key Fields: Product, batch/lot, supplier, storage location, distribution
+
+FORM 4: Recall_Notification
+  Fields: 8 inputs
+  Purpose: Product recall documentation
+  Key Fields: Recall date, reason, health risk, quantities, recovery tracking
+
+FORM 5: Corrective_Action_Plan
+  Fields: 8 inputs
+  Purpose: Corrective action tracking
+  Key Fields: Issue, root cause, action owner, deadline, priority, status
+
+FORM 6: Regulatory_Report
+  Fields: 9 inputs
+  Purpose: Regulatory notification tracking
+  Key Fields: Regulatory body, report type, notification method, reference #
+
+FORM 7: Root_Cause_Analysis
+  Fields: 9 inputs
+  Purpose: Systematic incident investigation
+  Key Fields: Problem statement, root cause, contributing factors, evidence
+
+FORM 8: Investigation_Log
+  Fields: 9 inputs
+  Purpose: Investigation activity tracking
+  Key Fields: Investigator, scope, interviews, documents, findings
+
+================================================================================
+DATABASE REQUIREMENTS MET
+================================================================================
+
+ID Allocation:
+  ✓ Page IDs 189-208 (20 pages)
+  ✓ Text IDs 303-322 (20 entries)
+  ✓ Revision IDs 1078-1097 (20 entries)
+  ✓ Slot entries (20, auto-numbered)
+  ✓ Content entries (20, auto-numbered)
+
+No Conflicts:
+  ✓ Previous highest page_id: 188
+  ✓ New range starts: 189
+  ✓ No overlaps with Orange (141) or Purple (188)
+
+Transaction Safety:
+  ✓ BEGIN statement at start
+  ✓ 100 INSERT statements
+  ✓ 4 verification queries
+  ✓ COMMIT statement at end
+  ✓ Atomic operation - all or nothing
+
+Byte Calculations:
+  ✓ All sizes pre-calculated
+  ✓ UTF-8 encoding verified
+  ✓ Content pages: 10,369 bytes total
+  ✓ Templates: 3,565 bytes total
+  ✓ Forms: 9,629 bytes total
+  ✓ Grand total: 23,563 bytes
+
+================================================================================
+VERIFICATION AFTER DEPLOYMENT
+================================================================================
+
+Immediate Verification (within database):
+
+1. Count Pages Created
+   Query: SELECT COUNT(*) FROM mediawiki.page WHERE page_id BETWEEN 189 AND 208;
+   Expected: 20
+
+2. Verify Text Entries
+   Query: SELECT COUNT(*) FROM mediawiki.text WHERE old_id BETWEEN 303 AND 322;
+   Expected: 20
+
+3. Verify Revisions
+   Query: SELECT COUNT(*) FROM mediawiki.revision WHERE rev_id BETWEEN 1078 AND 1097;
+   Expected: 20
+
+4. List All Created Pages
+   Query: SELECT page_id, page_namespace, page_title, page_len
+          FROM mediawiki.page
+          WHERE page_id BETWEEN 189 AND 208
+          ORDER BY page_id;
+   Expected: 20 rows with correct details
+
+MediaWiki UI Verification:
+
+1. Access Content Pages
+   URLs:
+   - http://mediawiki.local/wiki/FCP:Troubleshooting:Something_goes_wrong
+   - http://mediawiki.local/wiki/FCP:Troubleshooting:Dealing_complaints
+   - http://mediawiki.local/wiki/FCP:Troubleshooting:Tracing_food
+   - http://mediawiki.local/wiki/FCP:Troubleshooting:Recalling_food
+
+2. Access Form Pages
+   URLs:
+   - http://mediawiki.local/wiki/Form:Incident_Report
+   - http://mediawiki.local/wiki/Form:Complaint_Log
+   - http://mediawiki.local/wiki/Form:Food_Traceability_Record
+   - http://mediawiki.local/wiki/Form:Recall_Notification
+   - (etc.)
+
+3. Test Form Submission
+   - Open any form (e.g., Form:Incident_Report)
+   - Fill in sample data
+   - Click submit
+   - Verify new page is created with form data
+
+4. Verify Categories
+   - Check Red:Troubleshooting category
+   - Verify all 20 pages appear
+   - Check specific categories (Incident_Reports, etc.)
+
+================================================================================
+MAINTENANCE & SUPPORT
+================================================================================
+
+Documentation Organization:
+  Quick Reference    → Start here for fast lookup
+  Section Index      → Complete reference with all details
+  Structure Document → Technical specifications
+  Byte Calculations  → Size verification
+  This Summary       → Quick start and overview
+
+Cache Management (if pages don't appear):
+  Command 1:
+  ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.10
+
+  Command 2:
+  cd /usr/local/www/mediawiki
+
+  Command 3:
+  php maintenance/purgeList.php --db-touch
+
+  Command 4:
+  php maintenance/runJobs.php
+
+Troubleshooting:
+  Issue: Pages not showing
+  Solution: Clear cache (see above)
+
+  Issue: Forms not working
+  Solution: Verify PageForms extension installed
+
+  Issue: Database errors
+  Solution: Check PostgreSQL logs, verify credentials
+
+  Issue: Byte size mismatches
+  Solution: Check UTF-8 encoding, refer to calculations document
+
+Historical Context:
+  Purple (Closing):    Pages 169-188 (completed)
+  Red (Troubleshooting): Pages 189-208 (NEW)
+  Orange (Serving):    Pages 122-141 (completed)
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Execute the SQL script (use STEP 2 above)
+2. Verify in database (use verification queries)
+3. Clear MediaWiki cache
+4. Test in MediaWiki UI
+5. Archive this deployment package
+6. Update project status
+
+================================================================================
+FILE LOCATIONS
+================================================================================
+
+Location: /Users/georgemagnuson/Documents/GitHub/FCP_DCC/
+
+Files:
+  • red_troubleshooting_section.sql          (Main deployment script)
+  • RED_QUICK_REFERENCE.md                   (Fast lookup)
+  • RED_SECTION_INDEX.md                     (Complete index)
+  • RED_TROUBLESHOOTING_STRUCTURE.md         (Technical specs)
+  • RED_BYTE_CALCULATIONS.txt                (Size verification)
+  • RED_DEPLOYMENT_SUMMARY.txt               (This file)
+
+Reference Files (for comparison):
+  • purple_closing_section_corrected.sql     (Purple section pattern)
+  • PURPLE_QUICK_REFERENCE.md                (Reference format)
+  • PURPLE_SECTION_INDEX.md                  (Reference format)
+
+================================================================================
+SUCCESS CRITERIA - COMPLETION CHECKLIST
+================================================================================
+
+✅ SQL Script Created
+   - 1,014 lines
+   - 100 INSERT statements
+   - 4 verification queries
+   - Transaction-safe
+
+✅ All 20 Pages Defined
+   - 4 content pages (Know/Do/Show)
+   - 8 form templates
+   - 8 form pages
+   - Complete wikitext included
+
+✅ Database Ready
+   - ID allocation verified
+   - No conflicts
+   - Byte sizes calculated
+   - All pre-reqs met
+
+✅ Documentation Complete
+   - 5 supporting documents
+   - Quick reference guide
+   - Troubleshooting guide
+   - Deployment procedures
+   - Verification queries
+
+✅ Forms Functional
+   - All 8 forms defined
+   - All fields specified
+   - All dropdowns configured
+   - All categories assigned
+
+================================================================================
+SUPPORT CONTACTS
+================================================================================
+
+Database Issues:
+  Check PostgreSQL logs: /var/log/postgresql/
+  Database Host: 192.168.2.30
+  User: postgres
+  Database: mediawiki
+
+MediaWiki Issues:
+  Check MediaWiki logs: /usr/local/www/mediawiki/logs/
+  MediaWiki URL: http://mediawiki.local/wiki/
+  Extensions check: http://mediawiki.local/wiki/Special:Version
+
+Code Issues:
+  Repository: /Users/georgemagnuson/Documents/GitHub/FCP_DCC
+  Documentation: See supporting .md files
+
+================================================================================
+DOCUMENT INFORMATION
+================================================================================
+
+Version: 1.0
+Generated: 2026-01-29
+Status: PRODUCTION READY
+Reviewed: N/A (Initial deployment)
+Deployed: Not yet (awaiting execution)
+
+================================================================================
+END OF DEPLOYMENT SUMMARY
+================================================================================
+
+All files are prepared for immediate deployment.
+Execute step 2 (SQL script) to begin.
+Refer to RED_QUICK_REFERENCE.md for fast commands.

@@ -1,0 +1,383 @@
+================================================================================
+RED (TROUBLESHOOTING) SECTION - FILE INDEX & GUIDE
+================================================================================
+
+Project: FCP_DCC (Food Compliance Protocol - Digital Content Conversion)
+Section: Red (Troubleshooting) - Pages 189-208
+Generated: 2026-01-29
+Status: PRODUCTION READY
+
+================================================================================
+COMPLETE FILE LIST
+================================================================================
+
+1. red_troubleshooting_section.sql (44 KB, 1,014 lines)
+   ├─ Type: PostgreSQL deployment script
+   ├─ Content: 100 INSERT statements + 4 verification queries
+   ├─ Purpose: Deploy all 20 pages to MediaWiki database
+   ├─ Execute: PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 < red_troubleshooting_section.sql
+   └─ Status: Ready for production deployment
+
+2. RED_QUICK_REFERENCE.md (8.7 KB)
+   ├─ Type: Quick lookup markdown reference
+   ├─ Content: 
+   │  ├─ Page ID allocations (table)
+   │  ├─ Execution commands (copy-paste ready)
+   │  ├─ Verification commands (SQL queries)
+   │  ├─ Form field reference (quick specs)
+   │  └─ Troubleshooting tips
+   ├─ Purpose: Fast reference for operators
+   └─ Status: Quick start guide
+
+3. RED_SECTION_INDEX.md (16 KB)
+   ├─ Type: Complete documentation index
+   ├─ Content:
+   │  ├─ Generated file descriptions
+   │  ├─ Content page full specs (189-192)
+   │  ├─ Form template details (193-200)
+   │  ├─ Form page definitions (201-208)
+   │  ├─ Database schema mapping
+   │  ├─ Verification procedures
+   │  └─ Integration notes
+   ├─ Purpose: Complete reference documentation
+   └─ Status: Full technical specification
+
+4. RED_TROUBLESHOOTING_STRUCTURE.md (22 KB)
+   ├─ Type: Detailed technical specification
+   ├─ Content:
+   │  ├─ Full content page wikitext
+   │  ├─ Form template specifications
+   │  ├─ Form page definitions with all fields
+   │  ├─ Database integration details
+   │  ├─ Schema mapping (5 tables)
+   │  ├─ Category structure
+   │  └─ Deployment checklist
+   ├─ Purpose: Technical implementation guide
+   └─ Status: Production specification
+
+5. RED_BYTE_CALCULATIONS.txt (15 KB)
+   ├─ Type: Size verification document
+   ├─ Content:
+   │  ├─ Byte-by-byte calculations for all 20 pages
+   │  ├─ Content page sizing breakdown
+   │  ├─ Template sizing breakdown
+   │  ├─ Form page sizing breakdown
+   │  ├─ ID allocation verification
+   │  ├─ INSERT statement verification
+   │  └─ Post-deployment verification queries
+   ├─ Purpose: Size and allocation verification
+   └─ Status: Complete verification document
+
+6. RED_DEPLOYMENT_SUMMARY.txt (Current file)
+   ├─ Type: Deployment summary and quick start
+   ├─ Content:
+   │  ├─ Deliverables summary
+   │  ├─ Page structure overview
+   │  ├─ Quick start (3-step deployment)
+   │  ├─ Content page topics
+   │  ├─ Form page data collection
+   │  ├─ Database requirements verification
+   │  ├─ Post-deployment verification
+   │  ├─ Maintenance and support
+   │  └─ Next steps checklist
+   ├─ Purpose: High-level summary and quick start
+   └─ Status: Executive summary
+
+7. RED_SECTION_FILES.txt (This file)
+   ├─ Type: File index and usage guide
+   ├─ Content: This navigation guide
+   ├─ Purpose: Help users find the right document
+   └─ Status: Navigation aid
+
+================================================================================
+WHICH FILE TO READ FIRST?
+================================================================================
+
+IF YOU WANT TO:                          READ THIS FILE:
+─────────────────────────────────────  ────────────────────────────────
+Deploy immediately                     RED_QUICK_REFERENCE.md
+Understand page structure              RED_DEPLOYMENT_SUMMARY.txt
+Get all technical details              RED_SECTION_INDEX.md
+Understand form fields                 RED_TROUBLESHOOTING_STRUCTURE.md
+Verify byte calculations               RED_BYTE_CALCULATIONS.txt
+Execute deployment                     red_troubleshooting_section.sql
+
+================================================================================
+DOCUMENT RELATIONSHIPS
+================================================================================
+
+QUICK START GUIDE
+├─ RED_QUICK_REFERENCE.md ← START HERE for fast deployment
+│   └─ Links to: red_troubleshooting_section.sql
+│   └─ Links to: RED_SECTION_INDEX.md (for details)
+
+COMPREHENSIVE REFERENCE
+├─ RED_SECTION_INDEX.md ← READ THIS for complete specs
+│   └─ Links to: RED_TROUBLESHOOTING_STRUCTURE.md (technical)
+│   └─ Links to: RED_BYTE_CALCULATIONS.txt (verification)
+
+TECHNICAL SPECIFICATIONS
+├─ RED_TROUBLESHOOTING_STRUCTURE.md ← DETAILED technical guide
+│   └─ References: Database schema mapping
+│   └─ References: Form field specifications
+│   └─ References: Deployment checklist
+
+VERIFICATION & SIZE DATA
+├─ RED_BYTE_CALCULATIONS.txt ← Size verification
+│   └─ Linked to: All 20 pages (IDs 189-208)
+│   └─ Verification queries for post-deployment
+
+DEPLOYMENT SCRIPT
+├─ red_troubleshooting_section.sql ← EXECUTE THIS
+│   └─ 100 INSERT statements
+│   └─ 4 verification SELECT queries
+│   └─ Transaction-wrapped (BEGIN/COMMIT)
+
+OVERVIEW & SUMMARY
+├─ RED_DEPLOYMENT_SUMMARY.txt ← Executive summary
+│   └─ Page allocation table
+│   └─ 3-step quick start
+│   └─ Success criteria checklist
+
+================================================================================
+QUICK START WORKFLOW
+================================================================================
+
+STEP 1: READ (5 minutes)
+  File: RED_QUICK_REFERENCE.md
+  Actions:
+    ✓ Understand page structure
+    ✓ Note the 3-step deployment process
+    ✓ Prepare database credentials
+
+STEP 2: EXECUTE (1 minute)
+  File: red_troubleshooting_section.sql
+  Actions:
+    ✓ Run SQL script via psql
+    ✓ Verify transaction committed
+    ✓ Check PostgreSQL logs
+
+STEP 3: VERIFY (5 minutes)
+  File: RED_QUICK_REFERENCE.md (verification commands)
+  Actions:
+    ✓ Run count queries (expect 20 in each)
+    ✓ List pages with sizes
+    ✓ Clear MediaWiki cache
+
+STEP 4: TEST (10 minutes)
+  Browser: http://mediawiki.local/wiki/
+  Actions:
+    ✓ Access content pages (189-192)
+    ✓ Access form pages (201-208)
+    ✓ Test form submission
+
+================================================================================
+REFERENCE BY TOPIC
+================================================================================
+
+CONTENT PAGES (Pages 189-192):
+  Find in: RED_SECTION_INDEX.md (Content Pages section)
+  Full specs: RED_TROUBLESHOOTING_STRUCTURE.md (Content Pages Wikitext)
+  Topics: Incident management, complaints, traceability, recalls
+
+FORM TEMPLATES (Pages 193-200):
+  Find in: RED_SECTION_INDEX.md (Form Templates section)
+  Full specs: RED_TROUBLESHOOTING_STRUCTURE.md (Form Template Specifications)
+  Details: Table structures, field names, parameters
+
+FORM PAGES (Pages 201-208):
+  Find in: RED_SECTION_INDEX.md (Form Pages section)
+  Full specs: RED_TROUBLESHOOTING_STRUCTURE.md (Form Page Definitions)
+  Details: Input types, dropdowns, categories
+
+DATABASE SCHEMA:
+  PostgreSQL tables: RED_SECTION_INDEX.md (Database Integration)
+  Detailed mapping: RED_TROUBLESHOOTING_STRUCTURE.md (Database Integration)
+  Verification: RED_BYTE_CALCULATIONS.txt
+
+DEPLOYMENT:
+  Quick commands: RED_QUICK_REFERENCE.md
+  Step-by-step: RED_DEPLOYMENT_SUMMARY.txt
+  Technical detail: RED_TROUBLESHOOTING_STRUCTURE.md (Deployment Checklist)
+
+VERIFICATION:
+  SQL queries: RED_QUICK_REFERENCE.md (Verify Deployment)
+  Detailed steps: RED_SECTION_INDEX.md (Verification Steps)
+  Byte verification: RED_BYTE_CALCULATIONS.txt
+
+TROUBLESHOOTING:
+  Quick tips: RED_QUICK_REFERENCE.md (Troubleshooting)
+  Full guide: RED_SECTION_INDEX.md (Support)
+  Root causes: RED_TROUBLESHOOTING_STRUCTURE.md (Support & Troubleshooting)
+
+================================================================================
+FILE SIZES & STATISTICS
+================================================================================
+
+red_troubleshooting_section.sql
+  Size: 44 KB
+  Lines: 1,014
+  INSERT statements: 100
+  SELECT queries: 4
+  Execution time: < 1 second
+
+RED_QUICK_REFERENCE.md
+  Size: 8.7 KB
+  Purpose: Fast reference
+  Reading time: 5 minutes
+
+RED_SECTION_INDEX.md
+  Size: 16 KB
+  Purpose: Complete reference
+  Reading time: 15 minutes
+
+RED_TROUBLESHOOTING_STRUCTURE.md
+  Size: 22 KB
+  Purpose: Technical specs
+  Reading time: 20 minutes
+
+RED_BYTE_CALCULATIONS.txt
+  Size: 15 KB
+  Purpose: Size verification
+  Reading time: 10 minutes
+
+RED_DEPLOYMENT_SUMMARY.txt
+  Size: ~20 KB
+  Purpose: Overview and quick start
+  Reading time: 10 minutes
+
+RED_SECTION_FILES.txt (this file)
+  Size: ~10 KB
+  Purpose: Navigation guide
+  Reading time: 5 minutes
+
+TOTAL DOCUMENTATION: ~105 KB
+TOTAL DEPLOYMENT: ~130 KB (with SQL script)
+
+================================================================================
+SUCCESS CRITERIA - HOW TO VERIFY
+================================================================================
+
+Page Count:
+  Command: SELECT COUNT(*) FROM mediawiki.page WHERE page_id BETWEEN 189 AND 208;
+  Expected: 20
+  File reference: RED_QUICK_REFERENCE.md
+
+Text Entries:
+  Command: SELECT COUNT(*) FROM mediawiki.text WHERE old_id BETWEEN 303 AND 322;
+  Expected: 20
+  File reference: RED_QUICK_REFERENCE.md
+
+Revisions:
+  Command: SELECT COUNT(*) FROM mediawiki.revision WHERE rev_id BETWEEN 1078 AND 1097;
+  Expected: 20
+  File reference: RED_QUICK_REFERENCE.md
+
+MediaWiki UI Access:
+  URL: http://mediawiki.local/wiki/FCP:Troubleshooting:Something_goes_wrong
+  Expected: Page displays with Know/Do/Show sections
+  File reference: RED_QUICK_REFERENCE.md (MediaWiki UI Verification)
+
+Form Functionality:
+  URL: http://mediawiki.local/wiki/Form:Incident_Report
+  Expected: Form displays with 8 input fields
+  File reference: RED_QUICK_REFERENCE.md (MediaWiki UI Verification)
+
+================================================================================
+MAINTENANCE & UPDATES
+================================================================================
+
+If you need to:
+
+UPDATE CONTENT:
+  1. Edit directly in MediaWiki UI
+  2. Changes will be tracked in revision history
+  3. Documentation doesn't need updating
+
+ADD NEW FORMS:
+  1. Create new template (namespace 10)
+  2. Create new form page (namespace 0)
+  3. Use same patterns as existing forms
+  4. Reference: RED_TROUBLESHOOTING_STRUCTURE.md for patterns
+
+FIX AN ERROR:
+  1. Stop (don't execute SQL yet)
+  2. Check: RED_BYTE_CALCULATIONS.txt (verify sizes)
+  3. Check: RED_TROUBLESHOOTING_STRUCTURE.md (verify specs)
+  4. Contact: Database administrator if needed
+
+DEPLOY TO PRODUCTION:
+  1. Backup database first
+  2. Execute: RED_QUICK_REFERENCE.md (Step 2)
+  3. Verify: RED_QUICK_REFERENCE.md (verification commands)
+  4. Test: Browser testing (step 4 above)
+  5. Cache: RED_QUICK_REFERENCE.md (cache clearing commands)
+
+================================================================================
+CONTACT & SUPPORT
+================================================================================
+
+Database Issues:
+  Check: PostgreSQL logs
+  Host: 192.168.2.30
+  File: RED_QUICK_REFERENCE.md
+
+MediaWiki Issues:
+  Check: MediaWiki logs
+  URL: http://mediawiki.local/wiki/
+  File: RED_TROUBLESHOOTING_STRUCTURE.md
+
+Technical Questions:
+  Reference: RED_TROUBLESHOOTING_STRUCTURE.md
+  Or: RED_SECTION_INDEX.md
+
+Quick Answers:
+  Try: RED_QUICK_REFERENCE.md first
+
+================================================================================
+DOCUMENT VERSION CONTROL
+================================================================================
+
+Package Version: 1.0
+Generated: 2026-01-29
+Status: PRODUCTION READY
+Last reviewed: 2026-01-29
+
+All files consistent with:
+  ✓ Purple section patterns
+  ✓ Orange section structure
+  ✓ MediaWiki best practices
+  ✓ PostgreSQL schema
+  ✓ PageForms extension
+
+================================================================================
+NOTES FOR FUTURE USERS
+================================================================================
+
+1. All 20 pages are new (IDs 189-208)
+   No updates or modifications to existing pages
+
+2. Database allocation is sequential
+   Previous highest: 188 (Purple section)
+   New range: 189-208 (Red section)
+   No gaps or overlaps
+
+3. All documentation assumes:
+   Database host: 192.168.2.30
+   Database user: postgres
+   Database name: mediawiki
+   MediaWiki server: mediawiki.local
+
+4. Forms use PageForms extension
+   Requires PageForms extension to be installed
+   Check: http://mediawiki.local/wiki/Special:Version
+
+5. SQL script is transaction-safe
+   Either all 20 pages deploy or none
+   No partial deployments possible
+
+================================================================================
+END OF FILE INDEX
+================================================================================
+
+Next step: Read RED_QUICK_REFERENCE.md for deployment instructions.
