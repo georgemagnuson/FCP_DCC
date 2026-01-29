@@ -45,7 +45,8 @@
       "Bash(/tmp/create_dark_blue_pages.sh:*)",
       "WebFetch(domain:192.168.2.10)",
       "Bash(PGPASSWORD=\"rash4z4m!\" psql:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__memory-bank-v05__agent_search_documents"
     ]
   },
   "enableAllProjectMcpServers": true,
