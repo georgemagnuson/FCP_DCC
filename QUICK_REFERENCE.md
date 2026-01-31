@@ -1,8 +1,8 @@
 # FCP_DCC Quick Reference
 
 **Project:** Food Control Plan Compliance Documentation & Diary System
-**Last Updated:** 2026-01-27
-**Status:** Core infrastructure fully operational, Dark Blue sections documented and ready for implementation
+**Last Updated:** 2026-01-30
+**Status:** Phase 1 Complete: Record Management Pages deployed (Daily, Weekly, Monthly, Incident Records)
 
 ---
 
@@ -174,9 +174,58 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 
 ---
 
+## MediaWiki Page Creation Methods
+
+### Recommended: Direct SQL Database ✅
+
+**Status:** Works perfectly for page creation
+
+**What works:**
+- Inserting records into `page` table ✓
+- Creating page structure directly ✓
+- Full control over content and metadata ✓
+
+**What's complex:**
+- Must create entries in 5+ tables: `page`, `revision`, `text`, `content`, `slots`
+- Must maintain foreign key relationships correctly
+- Must get sequence IDs right (`rev_id`, `old_id`, `content_id`)
+
+**Complexity:** HIGH (requires full schema knowledge)
+
+**Best for:** Bulk operations, automated imports, reliable page creation
+
+**Advantages:**
+- Most reliable method
+- No caching issues
+- Full control over all page properties
+- Can batch multiple pages efficiently
+
+### Alternative Methods (Not Recommended)
+
+**PHP Maintenance Script (edit.php)** ❌
+- Has persistent bugs in MediaWiki 1.43.5
+- Returns conflicting error messages
+- Title existence checks fail against cache
+- Not recommended for production use
+
+**MediaWiki REST/API**
+- Works when authenticated
+- Requires CSRF token and session/API authentication
+- Less direct control than SQL
+- Good for web-based integrations
+
+---
+
 ## Current Project Status
 
-### ✅ Completed (as of 2026-01-27)
+### ✅ Completed (as of 2026-01-30)
+
+**Record Management Pages (Phase 1):**
+- Daily_Records (page_id: 230) - 16 form links
+- Weekly_Records (page_id: 231) - 9 form links
+- Monthly_Records (page_id: 232) - 4 form links
+- Incident_Records (page_id: 233) - 8 form links
+- Total: 37 form links across 4 organized pages
 
 **MediaWiki Implementation:**
 - Template:BusinessDetails - Production ready with conditional display
@@ -201,22 +250,35 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 
 ### 🔄 In Progress
 
+- **ACTIVE:** Phase 2 - Add SMW Properties to Form Templates
 - Implementing Dark Blue sections (4-11) as MediaWiki pages
 - Additional business page entries
-- Daily report templates
 - User permissions and access control
 
 ### 📋 Planned Next Steps
 
-1. **HIGH PRIORITY:** Create 8 Dark Blue section pages (FCP:Setting_Up:Business_layout, Risk_management, Responsibility, Plan_monitoring, Training_competency, Equipment_facilities, Water_supply_registered, Water_supply_self_supply)
-2. Create forms for Business layout uploads, Risk management tables, Water testing records
-3. Add SMW properties: responsible_person, water_supplier_name, water_test_results, equipment_list, nearby_risks
-4. Create SMW query dashboards for business search/filtering
-5. Implement form validation for business activities
-6. Add business logo/image upload capability
-7. Build compliance reporting dashboards
-8. Configure daily report submission workflow
-9. Set up inspector access and review features
+**Phase 2 (Next):** Add SMW Properties to Form Templates
+1. Create 12 SMW properties for records tracking (Has_submission_date, Has_record_type, Has_staff_name, Has_temperature, etc.)
+2. Update 30+ form templates with semantic annotations
+3. Enable dynamic Records Archive queries
+4. Test SMW properties on sample form submissions
+
+**Phase 3:** Create Records Archive Pages
+1. Records_Archive - Main hub and navigation
+2. Records_Archive/Daily - Today's submitted records
+3. Records_Archive/Weekly - This week's records
+4. Records_Archive/Monthly - This month's records
+5. Records_Archive/Search - Custom date range search interface
+
+**Phase 4:** Integration & Compliance
+1. Update Food_Control_Records main page with Record Management & Archive navigation
+2. Test end-to-end workflow (form entry → archive view)
+3. Configure inspector access and review features
+
+**High Priority (Parallel Track):** Dark Blue Sections
+1. Create 8 Dark Blue section pages (FCP:Setting_Up:Business_layout, Risk_management, Responsibility, Plan_monitoring, Training_competency, Equipment_facilities, Water_supply_registered, Water_supply_self_supply)
+2. Create business logo/image upload capability
+3. Build compliance reporting dashboards
 
 ---
 

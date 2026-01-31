@@ -46,7 +46,12 @@
       "WebFetch(domain:192.168.2.10)",
       "Bash(PGPASSWORD=\"rash4z4m!\" psql:*)",
       "Bash(ls:*)",
-      "mcp__memory-bank-v05__agent_search_documents"
+      "mcp__memory-bank-v05__agent_search_documents",
+      "mcp__memory-bank-v05__work_on_project",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(__NEW_LINE_42781eb26b94121a__ find /Users/georgemagnuson/Documents/GitHub/FCP_DCC/ARCHIVE -type f)"
     ]
   },
   "enableAllProjectMcpServers": true,
