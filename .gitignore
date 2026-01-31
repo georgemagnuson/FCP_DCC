@@ -60,3 +60,6 @@ Thumbs.db
 memory-bank/context.db
 memory-bank/context.db-shm
 memory-bank/context.db-wal
+
+# Archive folder (temporary and obsolete development files)
+ARCHIVE/
