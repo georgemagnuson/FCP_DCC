@@ -1,8 +1,8 @@
 # FCP_DCC Quick Reference
 
 **Project:** Food Control Plan Compliance Documentation & Diary System
-**Last Updated:** 2026-01-30
-**Status:** Phase 1 Complete: Record Management Pages deployed (Daily, Weekly, Monthly, Incident Records)
+**Last Updated:** 2026-02-01
+**Status:** Phase 3 Complete: Standardized PageForms Pattern & Working Data Systems deployed
 
 ---
 
@@ -43,10 +43,23 @@ ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
 ```
 
 **SSH Keys:** `~/.ssh/id_rsa` (confirmed working) or `~/.ssh/id_rsa-remote-ssh`
-**Status:** ✅ All servers accessible (tested 2026-01-27)
+**Status:** ✅ All servers accessible (tested 2026-02-01)
 **User:** `georgemagnuson`
 **Port:** 22 (standard)
-**PostgreSQL Access:** Verified from local machine using .env credentials
+**PostgreSQL Access:** Verified using .pgpass (no passwords in commands)
+
+### Quick SSH Commands (Password-Excluded - Tested 2026-02-01)
+
+```bash
+# PostgreSQL Server (postgresqljail)
+ssh 192.168.2.30
+
+# MediaWiki Server (llamajail)
+ssh 192.168.2.10
+
+# Then from server, use password-less psql:
+psql -U postgres -d mediawiki
+```
 
 ---
 
@@ -66,13 +79,33 @@ ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
 
 ### PostgreSQL (postgresqljail - 192.168.2.30)
 
-```bash
-# Connect from local machine (if on network)
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -p 5432
+#### From Local Machine
 
-# Connect from within postgresqljail
+**Method 1: Using PGPASSWORD (Legacy)**
+```bash
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -p 5432
+```
+
+#### From postgresqljail Server
+
+**Method 1: Using .pgpass (Recommended)**
+```bash
+# SSH into postgresqljail first
 ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
+
+# Then connect without password (uses ~/.pgpass)
 psql -U postgres -d mediawiki
+```
+
+**Status:** ✅ `.pgpass` configured at `/var/db/postgres/.pgpass` (2026-01-31)
+- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:rash4z4m!
+- **Permissions:** 600 (secure, only postgres user can read)
+- **Benefits:** No password in command history, secure for automated scripts/cron jobs
+
+**Method 2: Using PGPASSWORD**
+```bash
+ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
+PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki
 ```
 
 ### Databases & Credentials
@@ -218,14 +251,42 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 
 ## Current Project Status
 
-### ✅ Completed (as of 2026-01-30)
+### ✅ Completed (as of 2026-02-01)
 
-**Record Management Pages (Phase 1):**
+**Phase 1: Record Management Pages (Completed 2026-01-30)**
 - Daily_Records (page_id: 230) - 16 form links
 - Weekly_Records (page_id: 231) - 9 form links
 - Monthly_Records (page_id: 232) - 4 form links
 - Incident_Records (page_id: 233) - 8 form links
 - Total: 37 form links across 4 organized pages
+
+**Phase 2: SMW Properties & Form Templates (Completed 2026-01-30, Deployed to Production)**
+- **12 SMW Properties Created & Deployed:**
+  1. Has_submission_date
+  2. Has_record_type
+  3. Has_staff_name
+  4. Has_form_name
+  5. Has_temperature
+  6. Has_temperature_unit
+  7. Has_equipment_unit
+  8. Has_food_item
+  9. Has_pass_fail_status
+  10. Has_corrective_action
+  11. Has_incident_severity
+  12. Has_investigation_status
+
+- **30 Form Templates Updated with SMW Annotations:**
+  - Orange Section (7 templates): Temperature Monitoring, Equipment Log, Daily Checklist, Facility Inspection, Staff Training, Maintenance Request, Cleaning Schedule
+  - Purple Section (9 templates): Vendor Documentation, Supplier Audit, Product Receipt, Quality Verification, Lot Tracking, Certificate of Analysis, Supplier Contact, Product Specification, Safety Data Sheet
+  - Red Section (8 templates): Incident Report, Non-Conformance, Corrective Action, Root Cause Analysis, Investigation, Follow-up, Escalation, Closure
+  - Teal Section (6 templates): SOP Implementation, Process Documentation, Staff Competency, Training Assessment, Procedure Review, Knowledge Transfer
+
+- **Production Deployment:**
+  - Deployment Date: 2026-01-30
+  - Database Pages: 301-312 (12 dedicated infrastructure pages)
+  - Git Commits: cd8af49, 5ef768b, 0862f36
+  - Backup Location: /tmp/backup_mediawiki_before_phase2_20260130_181128.sql
+  - All properties indexed and queryable in production
 
 **MediaWiki Implementation:**
 - Template:BusinessDetails - Production ready with conditional display
@@ -233,6 +294,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 - Business entry form: FCP:Setting_Up:Business_details
 - 2 business pages created (The Jitsu Ltd)
 - Category cleanup completed
+- SMW cache and semantic index rebuilt
 
 **Dark Blue Sections Documentation:**
 - Sections 4-11 fully documented and ready for MediaWiki implementation (created 2026-01-26)
@@ -248,37 +310,79 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 - Django BI application stable and operational
 - Apache 2.4 running on llamajail with all services operational
 
+**Phase 3: Standardized PageForms Pattern & Working Data Systems (Completed 2026-02-01)**
+
+- **Standardized PageForms Pattern Established:**
+  - ✅ `default form=[Prefix]:` parameter for semantic grouping (forminput-level naming)
+  - ✅ Removed `{{{info}}}` tag approach (form-level naming) - less flexible
+  - ✅ Pattern supports future scalability with multiple data types
+  - ✅ Complete documentation saved to Memory Bank (10/10 importance)
+
+- **Item List System - Working Test Case:**
+  - ✅ Item_List portal page with categorytree and form input (page_id: 352)
+  - ✅ Form:Item - Standardized form definition (page_id: 346)
+  - ✅ Template:Item - Display template (page_id: 347)
+  - ✅ Category:Item - Category organization (page_id: 348)
+  - ✅ Successfully tested: Create Item:Laptop entry via form
+  - ✅ Verified categorytree listing works with cache refresh
+
+- **Equipment Registry System - Production Ready:**
+  - ✅ Equipment_Registry_Documentation portal page (page_id: 329)
+  - ✅ Form:Equipment_Registry - Full equipment form with 8 fields (page_id: 319)
+  - ✅ Template:Equipment - Equipment display template with SMW properties (page_id: 335)
+  - ✅ Category:Equipment - Equipment category organization
+  - ✅ Tested: Create Equipment:FRIDGE-01 entry via form
+  - ✅ Uses standardized `default form=Equipment:` parameter
+
+- **Access Control Model - Confirmed:**
+  - ✅ Two-layer permission system documented
+  - ✅ System Structure (Admin only): Templates, Forms, Portal Pages
+  - ✅ Data Entry (Role-based): Staff create/edit own data, Manager oversee all, Inspector read-only
+  - ✅ MediaWiki LocalSettings.php configuration documented
+  - ✅ User group structure: data-entry-staff, manager, inspector, sysop
+  - ✅ Complete implementation guide saved to Memory Bank (10/10 importance)
+
+- **SSH & Database Access Improvements:**
+  - ✅ Simplified SSH commands tested: `ssh 192.168.2.30`, `ssh 192.168.2.10`
+  - ✅ Password-less psql access verified: `psql -U postgres -d mediawiki`
+  - ✅ Both commands excluded from git/history (no credentials exposed)
+
 ### 🔄 In Progress
 
-- **ACTIVE:** Phase 2 - Add SMW Properties to Form Templates
+- **ACTIVE:** Phase 3 - Records Archive System with SMW Queries
 - Implementing Dark Blue sections (4-11) as MediaWiki pages
 - Additional business page entries
 - User permissions and access control
 
 ### 📋 Planned Next Steps
 
-**Phase 2 (Next):** Add SMW Properties to Form Templates
-1. Create 12 SMW properties for records tracking (Has_submission_date, Has_record_type, Has_staff_name, Has_temperature, etc.)
-2. Update 30+ form templates with semantic annotations
-3. Enable dynamic Records Archive queries
-4. Test SMW properties on sample form submissions
+**Phase 4 (Next):** Create Records Archive Pages with SMW Queries
+1. Develop SMW query templates using 12 semantic properties
+2. Records_Archive - Main hub and navigation
+3. Records_Archive/Daily - Today's submitted records (dynamic query)
+4. Records_Archive/Weekly - This week's records (dynamic query)
+5. Records_Archive/Monthly - This month's records (dynamic query)
+6. Records_Archive/Search - Custom date range search interface
+7. Create query templates for filtering by record type, staff, temperature, etc.
 
-**Phase 3:** Create Records Archive Pages
-1. Records_Archive - Main hub and navigation
-2. Records_Archive/Daily - Today's submitted records
-3. Records_Archive/Weekly - This week's records
-4. Records_Archive/Monthly - This month's records
-5. Records_Archive/Search - Custom date range search interface
-
-**Phase 4:** Integration & Compliance
+**Phase 5:** Integration & Compliance (Final)
 1. Update Food_Control_Records main page with Record Management & Archive navigation
 2. Test end-to-end workflow (form entry → archive view)
 3. Configure inspector access and review features
+4. Build compliance reporting dashboards
+5. Implement staff notification system
 
-**High Priority (Parallel Track):** Dark Blue Sections
+**High Priority (Parallel Track):** Dark Blue Sections Implementation
 1. Create 8 Dark Blue section pages (FCP:Setting_Up:Business_layout, Risk_management, Responsibility, Plan_monitoring, Training_competency, Equipment_facilities, Water_supply_registered, Water_supply_self_supply)
 2. Create business logo/image upload capability
 3. Build compliance reporting dashboards
+
+**Standardized Pattern Ready For:**
+- Temperature Registry (uses same form/template/portal pattern)
+- Supplier Registry
+- Staff Directory
+- Training Records
+- Any future data management system (reusable template)
 
 ---
 
@@ -336,13 +440,24 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 ## Memory Bank
 
 **Database Location:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/memory-bank/context.db`
-**Document Count:** 102 documents
+**Document Count:** 141+ documents
 **Schema Version:** v2.1
 
-### Key Documents
+### Key Documents (Priority Order - All 10/10 Importance)
+
+**2026-02-01 - Phase 3 Completion:**
+- **Standardized PageForms Pattern - Prefix-Based Semantic Grouping** (10/10) - Complete pattern documentation, checklist, and best practices for all data entry systems
+- **FCP_DCC Access Control Model - Confirmed** (10/10) - Two-layer permission system with LocalSettings.php configuration, user workflows, and implementation guide
+- **Working Business Details System - Complete Analysis** (10/10) - Reference pattern for form/template/portal page structure
+- **Item List System Documentation** (Reference) - Working test case demonstrating standardized pattern
+
+**2026-01-30:**
+- **Phase 2 Deployment: Complete Technical Documentation** (2026-01-30) - Full deployment details, SMW properties, form template updates
+- **Phase 3 Implementation Plan: Records Archive System with SMW Queries** (2026-01-30) - Planning document for next phase
+
+**2026-01-26:**
 - **Dark Blue Remaining Sections** (2026-01-26) - Complete specifications for FCP Sections 4-11, ready for MediaWiki implementation
 - **MediaWiki Pages Inventory** (2026-01-26) - Status of all FCP translation pages
-- **MediaWiki Dark Blue Section - Conformance Review** (2026-01-19) - Final verification of Business Details implementation
 
 ### Quick Searches
 ```
@@ -392,6 +507,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 - Color scheme supports accessibility standards
 - OpenVPN tunnel connects JITSU to ASTEROID M for DB access
 - All jails configured with persistent storage and auto-start on reboot
+- **PostgreSQL `.pgpass` configured** (2026-01-31): `/var/db/postgres/.pgpass` on postgresqljail enables password-less psql connections and secure automated scripts/cron jobs
 
 ---
 
