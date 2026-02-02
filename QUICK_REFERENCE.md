@@ -48,18 +48,25 @@ ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
 **Port:** 22 (standard)
 **PostgreSQL Access:** Verified using .pgpass (no passwords in commands)
 
-### Quick SSH Commands (Password-Excluded - Tested 2026-02-01)
+### Quick SSH Commands (Password-Excluded - Updated 2026-02-02)
+
+**Simplified SSH Access (No flags needed):**
 
 ```bash
-# PostgreSQL Server (postgresqljail)
-ssh 192.168.2.30
-
 # MediaWiki Server (llamajail)
 ssh 192.168.2.10
 
-# Then from server, use password-less psql:
+# Wiki.js + Django Server (djangojail)
+ssh 192.168.2.20
+
+# PostgreSQL Server (postgresqljail)
+ssh 192.168.2.30
+
+# Then from any server, use password-less psql:
 psql -U postgres -d mediawiki
 ```
+
+**SSH Configuration:** `~/.ssh/config` has been updated with key-based authentication for all three jails. No SSH flags needed.
 
 ---
 
