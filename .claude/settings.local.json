@@ -52,7 +52,8 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(__NEW_LINE_42781eb26b94121a__ find /Users/georgemagnuson/Documents/GitHub/FCP_DCC/ARCHIVE -type f)",
-      "Bash(python /Users/georgemagnuson/bin/claude_database_utilities/db_query_helper.py --query \"SELECT page_title, page_id, page_namespace FROM page WHERE page_id IN \\(319, 327, 19\\) ORDER BY page_id\" --format table)"
+      "Bash(python /Users/georgemagnuson/bin/claude_database_utilities/db_query_helper.py --query \"SELECT page_title, page_id, page_namespace FROM page WHERE page_id IN \\(319, 327, 19\\) ORDER BY page_id\" --format table)",
+      "Skill(database-query)"
     ]
   },
   "enableAllProjectMcpServers": true,
