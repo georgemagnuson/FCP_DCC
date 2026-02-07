@@ -27,25 +27,19 @@
 
 ```bash
 # MediaWiki Host (llamajail)
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.10
-# or
-ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.10
+ssh 192.168.2.10
 
 # Wiki.js + Django Host (djangojail)
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.20
-# or
-ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.20
+ssh 192.168.2.20
 
 # PostgreSQL Server (postgresqljail)
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
-# or
-ssh -i ~/.ssh/id_rsa-remote-ssh georgemagnuson@192.168.2.30
+ssh 192.168.2.30
 ```
 
-**SSH Keys:** `~/.ssh/id_rsa` (confirmed working) or `~/.ssh/id_rsa-remote-ssh`
-**Status:** ✅ All servers accessible (tested 2026-02-01)
+**Status:** ✅ All servers accessible (tested 2026-02-07)
 **User:** `georgemagnuson`
 **Port:** 22 (standard)
+**SSH Key:** Configured in `~/.ssh/config` for key-based authentication
 **PostgreSQL Access:** Verified using .pgpass (no passwords in commands)
 
 ### Quick SSH Commands (Password-Excluded - Updated 2026-02-02)
@@ -88,17 +82,23 @@ psql -U postgres -d mediawiki
 
 #### From Local Machine
 
-**Method 1: Using PGPASSWORD (Legacy)**
+**Using .pgpass (Recommended)**
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -p 5432
+# Direct connection (uses ~/.pgpass for credentials)
+psql -h 192.168.2.30 -U postgres -d mediawiki
 ```
+
+**Status:** ✅ `.pgpass` configured at `~/.pgpass`
+- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:rash4z4m!
+- **Permissions:** 600 (secure)
+- **Benefits:** No password in command history, secure for automated scripts/cron jobs
 
 #### From postgresqljail Server
 
-**Method 1: Using .pgpass (Recommended)**
+**Using .pgpass (Recommended)**
 ```bash
 # SSH into postgresqljail first
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
+ssh 192.168.2.30
 
 # Then connect without password (uses ~/.pgpass)
 psql -U postgres -d mediawiki
@@ -107,13 +107,6 @@ psql -U postgres -d mediawiki
 **Status:** ✅ `.pgpass` configured at `/var/db/postgres/.pgpass` (2026-01-31)
 - **Credentials:** 192.168.2.30:5432:mediawiki:postgres:rash4z4m!
 - **Permissions:** 600 (secure, only postgres user can read)
-- **Benefits:** No password in command history, secure for automated scripts/cron jobs
-
-**Method 2: Using PGPASSWORD**
-```bash
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki
-```
 
 ### Databases & Credentials
 
@@ -199,17 +192,17 @@ php /usr/local/www/mediawiki/maintenance/update.php
 ### Database Queries
 
 ```bash
-# List all databases
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -l
+# List all databases (uses ~/.pgpass)
+psql -U postgres -h 192.168.2.30 -l
 
-# List tables in mediawiki database
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "\dt"
+# List tables in mediawiki database (uses ~/.pgpass)
+psql -U postgres -d mediawiki -h 192.168.2.30 -c "\dt"
 
-# List SMW properties
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT * FROM mediawiki.smw_object_ids WHERE smw_iw = '' LIMIT 20;"
+# List SMW properties (uses ~/.pgpass)
+psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT * FROM mediawiki.smw_object_ids WHERE smw_iw = '' LIMIT 20;"
 
-# Query FCP pages
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawiki.page WHERE page_title LIKE 'FCP%' ORDER BY page_title;"
+# Query FCP pages (uses ~/.pgpass)
+psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawiki.page WHERE page_title LIKE 'FCP%' ORDER BY page_title;"
 ```
 
 ---
@@ -490,7 +483,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT 
 ### Database Connection Issues
 1. Verify PostgreSQL is running: `sudo service postgresql status`
 2. Check pg_hba.conf for access rules
-3. Test connection: `psql -U mediawiki -d mediawiki -h 192.168.2.30`
+3. Test connection: `psql -U postgres -d mediawiki -h 192.168.2.30` (uses ~/.pgpass)
 4. Check LocalSettings.php database configuration
 
 ### SSH Access Issues
