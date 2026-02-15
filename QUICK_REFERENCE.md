@@ -89,7 +89,7 @@ psql -h 192.168.2.30 -U postgres -d mediawiki
 ```
 
 **Status:** ✅ `.pgpass` configured at `~/.pgpass`
-- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:rash4z4m!
+- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:[PASSWORD]
 - **Permissions:** 600 (secure)
 - **Benefits:** No password in command history, secure for automated scripts/cron jobs
 
@@ -105,7 +105,7 @@ psql -U postgres -d mediawiki
 ```
 
 **Status:** ✅ `.pgpass` configured at `/var/db/postgres/.pgpass` (2026-01-31)
-- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:rash4z4m!
+- **Credentials:** 192.168.2.30:5432:mediawiki:postgres:[PASSWORD]
 - **Permissions:** 600 (secure, only postgres user can read)
 
 ### Databases & Credentials
@@ -178,15 +178,18 @@ sudo service postgresql restart
 ### MediaWiki Maintenance
 
 ```bash
-# Clear cache after template changes
+# Clear cache after template or page changes (CRITICAL after deployments)
 php /usr/local/www/mediawiki/maintenance/purgeList.php --db-touch
 php /usr/local/www/mediawiki/maintenance/runJobs.php
 
-# Rebuild semantic data
+# Rebuild semantic data (required after form submissions to archive pages)
 php /usr/local/www/mediawiki/maintenance/runJobs.php --maxjobs=1000
 
 # Update database schema
 php /usr/local/www/mediawiki/maintenance/update.php
+
+# Quick SSH + maintenance (from local machine, no password needed)
+ssh 192.168.2.10 'cd /usr/local/www/mediawiki && php maintenance/purgeList.php --db-touch && php maintenance/runJobs.php'
 ```
 
 ### Database Queries
@@ -203,6 +206,35 @@ psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT * FROM mediawiki.smw_ob
 
 # Query FCP pages (uses ~/.pgpass)
 psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawiki.page WHERE page_title LIKE 'FCP%' ORDER BY page_title;"
+```
+
+### SQL Deployment Pattern (for Phase deployments)
+
+**Standard 3-step deployment (with backup & verification):**
+
+```bash
+# 1. Create backup before deployment (uses ~/.pgpass)
+pg_dump -h 192.168.2.30 -U postgres -d mediawiki > /tmp/backup_mediawiki_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. Deploy SQL script (uses ~/.pgpass)
+psql -h 192.168.2.30 -U postgres -d mediawiki -f /path/to/script.sql
+
+# 3. Verify deployment (uses ~/.pgpass)
+# Check that pages were created with correct IDs
+psql -h 192.168.2.30 -U postgres -d mediawiki -c "SELECT page_id, page_title FROM mediawiki.page WHERE page_id BETWEEN 313 AND 317;"
+```
+
+**After SQL deployment, always clear MediaWiki cache:**
+
+```bash
+ssh 192.168.2.10 'cd /usr/local/www/mediawiki && php maintenance/purgeList.php --db-touch && php maintenance/runJobs.php'
+```
+
+**Rollback if needed:**
+
+```bash
+# Restore from backup (uses ~/.pgpass)
+psql -h 192.168.2.30 -U postgres -d mediawiki < /tmp/backup_mediawiki_*.sql
 ```
 
 ---
@@ -259,6 +291,44 @@ psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawi
 - Monthly_Records (page_id: 232) - 4 form links
 - Incident_Records (page_id: 233) - 8 form links
 - Total: 37 form links across 4 organized pages
+
+**Phase 3: Records Archive System with SMW Queries (Completed 2026-01-31)**
+
+- **5 Archive Pages Created** (page_id 313-317):
+  - Records_Archive (313) - Main hub with navigation and summary statistics
+  - Records_Archive/Daily (314) - Today's submitted records with pass/fail counts
+  - Records_Archive/Weekly (315) - Last 7 days with failure tracking and trends
+  - Records_Archive/Monthly (316) - Last 30 days with incident severity tracking
+  - Records_Archive/Search (317) - Advanced search with multiple filter options
+
+- **40+ SMW Queries Deployed:**
+  - Date-based filtering (today, 7 days, 30 days, 60 days, 90 days)
+  - Status filtering (Pass/Fail)
+  - Severity filtering (Critical, High, Medium)
+  - Form type filtering (temperature, maintenance, incidents)
+  - Staff tracking and performance views
+  - Temperature monitoring queries
+
+- **SMW Query Patterns Used:**
+  ```wiki
+  {{#ask: [[Has_submission_date::{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY}}]] }}
+  {{#ask: [[Has_submission_date::>{{#time:Y-m-d|now -7 days}}]] }}
+  {{#ask: [[Has_pass_fail_status::Pass]] [[Has_submission_date::>{{#time:Y-m-d|now -30 days}}]] }}
+  {{#ask: [[Has_incident_severity::Critical]] OR [[Has_incident_severity::High]] }}
+  ```
+
+- **Deployment Details:**
+  - Database: mediawiki on 192.168.2.30
+  - Backup created: `/tmp/backup_mediawiki_before_phase3_20260131_*.sql`
+  - Atomic transaction: All 25 INSERT operations successful
+  - Cache cleared: `php maintenance/purgeList.php --db-touch`
+  - Job queue processed: `php maintenance/runJobs.php`
+
+- **Testing Status:**
+  - All pages accessible and verified
+  - All SMW queries syntactically correct
+  - Ready for form submission testing
+  - Pages display "No records" until data is submitted (expected behavior)
 
 **Phase 2: SMW Properties & Form Templates (Completed 2026-01-30, Deployed to Production)**
 - **12 SMW Properties Created & Deployed:**
@@ -349,21 +419,25 @@ psql -U postgres -d mediawiki -h 192.168.2.30 -c "SELECT page_title FROM mediawi
 
 ### 🔄 In Progress
 
-- **ACTIVE:** Phase 3 - Records Archive System with SMW Queries
+- **ACTIVE:** Testing Records Archive System with form submissions
 - Implementing Dark Blue sections (4-11) as MediaWiki pages
 - Additional business page entries
 - User permissions and access control
 
 ### 📋 Planned Next Steps
 
-**Phase 4 (Next):** Create Records Archive Pages with SMW Queries
-1. Develop SMW query templates using 12 semantic properties
-2. Records_Archive - Main hub and navigation
-3. Records_Archive/Daily - Today's submitted records (dynamic query)
-4. Records_Archive/Weekly - This week's records (dynamic query)
-5. Records_Archive/Monthly - This month's records (dynamic query)
-6. Records_Archive/Search - Custom date range search interface
-7. Create query templates for filtering by record type, staff, temperature, etc.
+**Phase 4 (Next):** Test & Deploy Dark Blue Sections
+1. Create 8 Dark Blue section pages (Business Layout, Risk Management, Responsibility, Plan Monitoring, Training & Competency, Equipment & Facilities, Water Supply - Registered, Water Supply - Self-Supply)
+2. Test Records Archive pages with real form submission data
+3. Configure staff and manager access to archive pages
+4. Monitor query performance with live data
+
+**Phase 5:** Integration & Compliance (Final)
+1. Update Food_Control_Records main page with Records_Archive link
+2. Test end-to-end workflow (form entry → archive view)
+3. Configure inspector access and review features
+4. Build compliance reporting dashboards
+5. Implement staff notification system
 
 **Phase 5:** Integration & Compliance (Final)
 1. Update Food_Control_Records main page with Record Management & Archive navigation

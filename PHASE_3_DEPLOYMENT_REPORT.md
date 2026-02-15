@@ -236,9 +236,9 @@ Pages are ready for the following tests:
 
 ### Rollback Options Available (If Needed)
 
-**Option 1: Restore from Backup**
+**Option 1: Restore from Backup (uses ~/.pgpass - no password needed)**
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki \
+psql -U postgres -h 192.168.2.30 -d mediawiki \
   < /tmp/backup_mediawiki_before_phase3_20260131_135301.sql
 ```
 

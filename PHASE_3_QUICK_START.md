@@ -11,20 +11,20 @@
 ## One-Command Deployment
 
 ```bash
-# 1. Create backup
-PGPASSWORD="rash4z4m!" pg_dump -U postgres -h 192.168.2.30 -d mediawiki \
+# 1. Create backup (uses ~/.pgpass - no password needed)
+pg_dump -h 192.168.2.30 -U postgres -d mediawiki \
   > /tmp/backup_mediawiki_before_phase3_$(date +%Y%m%d_%H%M%S).sql
 
-# 2. Deploy all 5 pages
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki \
+# 2. Deploy all 5 pages (uses ~/.pgpass - no password needed)
+psql -h 192.168.2.30 -U postgres -d mediawiki \
   -f /Users/georgemagnuson/Documents/GitHub/FCP_DCC/create_records_archive.sql
 
-# 3. Verify deployment
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+# 3. Verify deployment (uses ~/.pgpass - no password needed)
+psql -h 192.168.2.30 -U postgres -d mediawiki -c \
   "SELECT page_id, page_title FROM mediawiki.page WHERE page_id BETWEEN 313 AND 317;"
 
 # 4. Clear cache (SSH to 192.168.2.10)
-ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.10 \
+ssh 192.168.2.10 \
   'cd /usr/local/www/mediawiki && php maintenance/purgeList.php --db-touch && php maintenance/runJobs.php'
 
 # 5. Visit pages
@@ -34,6 +34,8 @@ ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.10 \
 # http://192.168.2.10/Records_Archive/Monthly
 # http://192.168.2.10/Records_Archive/Search
 ```
+
+**Note:** All commands use `~/.pgpass` for database authentication. See QUICK_REFERENCE.md for credential setup.
 
 ---
 
@@ -215,10 +217,10 @@ If anything goes wrong:
 
 **Automatic Rollback:** If deployment fails, database rolls back automatically.
 
-**Manual Rollback (if needed):**
+**Manual Rollback (if needed - uses ~/.pgpass):**
 ```bash
 # Restore from backup
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki \
+psql -U postgres -h 192.168.2.30 -d mediawiki \
   < /tmp/backup_mediawiki_before_phase3_20260131_XXXXXX.sql
 ```
 

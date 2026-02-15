@@ -34,7 +34,7 @@ This guide walks you through deploying Phase 3: Records Archive System. This pha
 ### 1. Verify Phase 2 is Complete
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT COUNT(*) FROM mediawiki.page WHERE page_id BETWEEN 301 AND 312;"
 ```
 
@@ -43,7 +43,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### 2. Verify Page ID Availability
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT page_id, page_title FROM mediawiki.page WHERE page_id BETWEEN 313 AND 317;"
 ```
 
@@ -52,7 +52,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### 3. Verify Current max page_id
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT MAX(page_id) FROM mediawiki.page;"
 ```
 
@@ -61,7 +61,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### 4. Verify Current max rev_id
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT MAX(rev_id) FROM mediawiki.revision;"
 ```
 
@@ -70,7 +70,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### 5. Verify Current max old_id
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT MAX(old_id) FROM mediawiki.text;"
 ```
 
@@ -83,7 +83,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### Step 1: Create Pre-Deployment Backup
 
 ```bash
-PGPASSWORD="rash4z4m!" pg_dump -U postgres -h 192.168.2.30 -d mediawiki \
+pg_dump -U postgres -h 192.168.2.30 -d mediawiki \
   > /tmp/backup_mediawiki_before_phase3_$(date +%Y%m%d_%H%M%S).sql
 ```
 
@@ -105,9 +105,11 @@ scp -i ~/.ssh/id_rsa \
 ### Step 3: Execute Deployment Script
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki \
+psql -U postgres -h 192.168.2.30 -d mediawiki \
   -f /Users/georgemagnuson/Documents/GitHub/FCP_DCC/create_records_archive.sql
 ```
+
+**Note:** Uses `~/.pgpass` for authentication. See QUICK_REFERENCE.md for credential setup.
 
 **Expected output:**
 ```
@@ -128,7 +130,7 @@ COMMIT
 Run verification query to confirm all pages were created:
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT page_id, page_title, page_len FROM mediawiki.page WHERE page_id BETWEEN 313 AND 317 ORDER BY page_id;"
 ```
 
@@ -146,7 +148,7 @@ PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
 ### Step 5: Verify Revisions Were Created
 
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -d mediawiki -c \
+psql -U postgres -h 192.168.2.30 -d mediawiki -c \
   "SELECT rev_id, rev_page, rev_len FROM mediawiki.revision WHERE rev_id BETWEEN 1128 AND 1132 ORDER BY rev_id;"
 ```
 
@@ -282,7 +284,7 @@ ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.30
 ssh -i ~/.ssh/id_rsa georgemagnuson@192.168.2.10 'sudo service apache24 stop'
 
 # Restore backup
-PGPASSWORD="rash4z4m!" psql -U postgres -d mediawiki -h 192.168.2.30 \
+psql -U postgres -d mediawiki -h 192.168.2.30 \
   < /tmp/backup_mediawiki_before_phase3_20260131_XXXXXX.sql
 
 # Restart services
@@ -443,8 +445,10 @@ php /usr/local/www/mediawiki/maintenance/purgeList.php --db-touch
 **Cause:** Network or PostgreSQL issue
 **Solution:** Verify PostgreSQL is running and accessible:
 ```bash
-PGPASSWORD="rash4z4m!" psql -U postgres -h 192.168.2.30 -c "SELECT 1;"
+psql -U postgres -h 192.168.2.30 -c "SELECT 1;"
 ```
+
+(Uses `~/.pgpass` for authentication)
 
 ---
 
