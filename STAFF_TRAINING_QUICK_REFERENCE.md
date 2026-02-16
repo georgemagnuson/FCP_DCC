@@ -112,8 +112,8 @@ SUPERVISOR clicks "Verify Employee Training"
 ## Deployment Command (PostgreSQL)
 
 ```bash
-# On MediaWiki server:
-psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db \
+# Deploy to PostgreSQL server (192.168.2.30):
+psql -h 192.168.2.30 -U mediawiki_user -d mediawiki_db \
   -f create_staff_training_system_phase1.sql
 ```
 
@@ -121,12 +121,12 @@ psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db \
 
 ```bash
 # Check all 21 pages created:
-psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+psql -h 192.168.2.30 -U mediawiki_user -d mediawiki_db -c \
   "SELECT COUNT(*) FROM mediawiki.page WHERE page_id BETWEEN 370 AND 390;"
 # Expected: 21
 
 # Check properties specifically:
-psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+psql -h 192.168.2.30 -U mediawiki_user -d mediawiki_db -c \
   "SELECT COUNT(*) FROM mediawiki.page WHERE page_namespace=102 AND page_id BETWEEN 370 AND 379;"
 # Expected: 10
 ```
