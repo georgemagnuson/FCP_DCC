@@ -142,9 +142,10 @@ User dashboards with SMW queries for filtered views.
    /Users/georgemagnuson/Documents/GitHub/FCP_DCC/create_staff_training_system_phase1.sql
    ```
 
-2. **Execute on MediaWiki Database**
+2. **Execute on PostgreSQL MediaWiki Database**
    ```bash
-   mysql -h 192.168.2.10 -u mediawiki_user -p mediawiki_db < create_staff_training_system_phase1.sql
+   psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db \
+     -f create_staff_training_system_phase1.sql
    ```
 
 3. **Clear MediaWiki Cache**
@@ -157,12 +158,12 @@ User dashboards with SMW queries for filtered views.
 4. **Verify Deployment**
    ```bash
    # Check all 21 pages created
-   mysql -h 192.168.2.10 -u mediawiki_user -p mediawiki_db -e \
+   psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
      "SELECT COUNT(*) as total_pages FROM mediawiki.page WHERE page_id BETWEEN 370 AND 390;"
    # Expected: 21
 
    # Check properties
-   mysql -h 192.168.2.10 -u mediawiki_user -p mediawiki_db -e \
+   psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
      "SELECT page_title FROM mediawiki.page WHERE page_namespace=102 AND page_id BETWEEN 370 AND 379;"
    # Expected: 10 properties
    ```

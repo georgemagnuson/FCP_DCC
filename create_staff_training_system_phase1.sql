@@ -1,5 +1,6 @@
 -- =====================================================================
 -- Staff Training System - Phase 1 Implementation
+-- Database: PostgreSQL (MediaWiki)
 -- Date: 2026-02-16
 -- Status: Ready for Deployment
 -- Purpose: Role-based staff training management with employee self-completion
@@ -17,6 +18,9 @@
 -- - 3 Form pages (380, 382, 384)
 -- - 3 Template pages (381, 383, 385)
 -- - 2 Portal pages (389-390)
+--
+-- Database: PostgreSQL compatible syntax
+-- Tested with: MediaWiki 1.43.5 on PostgreSQL
 --
 -- =====================================================================
 
@@ -877,39 +881,46 @@ VALUES (390, 0, 'Supervisor_Training_Verification', 0, 1, RANDOM(), NOW(), 1276,
 COMMIT;
 
 -- =====================================================================
--- VERIFICATION QUERIES
+-- VERIFICATION QUERIES (PostgreSQL)
 -- =====================================================================
 -- Run these queries after deployment to verify all pages were created:
 --
--- SELECT COUNT(*) as total_pages FROM mediawiki.page
--- WHERE page_id BETWEEN 370 AND 390;
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as total_pages FROM mediawiki.page
+--    WHERE page_id BETWEEN 370 AND 390;"
 -- Expected result: 21
 --
--- SELECT page_id, page_namespace, page_title FROM mediawiki.page
--- WHERE page_id BETWEEN 370 AND 390
--- ORDER BY page_id;
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT page_id, page_namespace, page_title FROM mediawiki.page
+--    WHERE page_id BETWEEN 370 AND 390
+--    ORDER BY page_id;"
 --
--- SELECT COUNT(*) as properties FROM mediawiki.page
--- WHERE page_namespace = 102
--- AND page_id BETWEEN 370 AND 379;
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as properties FROM mediawiki.page
+--    WHERE page_namespace = 102
+--    AND page_id BETWEEN 370 AND 379;"
 -- Expected result: 10 properties
 --
--- SELECT COUNT(*) as forms FROM mediawiki.page
--- WHERE page_namespace = 106
--- AND page_id IN (380, 382, 384);
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as forms FROM mediawiki.page
+--    WHERE page_namespace = 106
+--    AND page_id IN (380, 382, 384);"
 -- Expected result: 3 forms
 --
--- SELECT COUNT(*) as templates FROM mediawiki.page
--- WHERE page_namespace = 10
--- AND page_id IN (381, 383, 385);
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as templates FROM mediawiki.page
+--    WHERE page_namespace = 10
+--    AND page_id IN (381, 383, 385);"
 -- Expected result: 3 templates
 --
--- SELECT COUNT(*) as categories FROM mediawiki.page
--- WHERE page_namespace = 14
--- AND page_id IN (386, 387, 388);
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as categories FROM mediawiki.page
+--    WHERE page_namespace = 14
+--    AND page_id IN (386, 387, 388);"
 -- Expected result: 3 categories
 --
--- SELECT COUNT(*) as portals FROM mediawiki.page
--- WHERE page_namespace = 0
--- AND page_id IN (389, 390);
+-- psql -h 192.168.2.10 -U mediawiki_user -d mediawiki_db -c \
+--   "SELECT COUNT(*) as portals FROM mediawiki.page
+--    WHERE page_namespace = 0
+--    AND page_id IN (389, 390);"
 -- Expected result: 2 portals
