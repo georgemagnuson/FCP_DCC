@@ -302,6 +302,136 @@ SELECT setval('mediawiki.content_content_id_seq', (SELECT MAX(content_id) + 1 FR
 
 ---
 
+## MediaWiki User Creation & Management
+
+### Important: MediaWiki vs PostgreSQL Users
+
+**MediaWiki Users** (separate from database users):
+- Stored in `mediawiki.user` table (application level)
+- Used for: Web interface login, permissions, activity tracking
+- Examples: `Georgemagnuson`, `Manager`, `Inspector`, etc.
+- Create as many as needed without creating PostgreSQL users
+
+**PostgreSQL Users** (database system level):
+- Only ONE needed for entire application: `postgres` (in LocalSettings.php)
+- Not related to web login users
+
+### Create Users via Web Interface (Recommended for Admins)
+
+**1. Direct Creation (Simplest):**
+```
+1. Navigate to: http://192.168.2.10/mediawiki/Special:CreateAccount
+2. Or: http://192.168.1.18/mediawiki/Special:CreateAccount (via reverse proxy)
+3. Enter username and password
+4. Click "Create account"
+```
+
+**2. Add to Groups (Optional - requires sysop):**
+```
+1. Navigate to: Special:UserRights
+2. Enter username
+3. Select group(s):
+   - sysop (system administrator)
+   - bureaucrat (manage user groups)
+   - interface-admin (edit site interface)
+   - data-entry-staff (staff who submit forms)
+   - manager (oversee operations)
+   - inspector (read-only access)
+4. Click "Update user groups"
+```
+
+### Create Users via MediaWiki API
+
+**Create a basic user account:**
+```bash
+# Using mw-crud (simpler method)
+~/.claude/skills/mediawiki-crud/mw-crud create "User:NewUsername" \
+  --content "New user account" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
+```
+
+**Create user with API token (advanced):**
+```bash
+curl -X POST "http://192.168.2.10/mediawiki/api.php" \
+  -d "action=createaccount" \
+  -d "lgname=NewUsername" \
+  -d "lgpassword=TempPassword123!" \
+  -d "lgconfirmpassword=TempPassword123!" \
+  -d "format=json" \
+  -d "realname=First Last" \
+  -d "mailaddress=email@example.com"
+```
+
+### Add User to Groups via API
+
+```bash
+curl -X POST "http://192.168.2.10/mediawiki/api.php" \
+  -d "action=userrights" \
+  -d "user=NewUsername" \
+  -d "add=sysop|bureaucrat" \
+  -d "token=TOKEN_FROM_QUERY_TOKENS" \
+  -d "format=json"
+```
+
+### Query Existing Users
+
+```bash
+# From database
+psql -h 192.168.2.30 -U postgres -d mediawiki << 'EOF'
+SELECT user_id, user_name, user_email, user_registration
+FROM mediawiki.user
+ORDER BY user_id;
+EOF
+
+# From MediaWiki API
+~/.claude/skills/mediawiki-crud/mw-crud read "Special:ListUsers" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
+```
+
+### Reset User Password
+
+**Via Web Interface (if admin):**
+```
+1. Special:ChangePassword
+2. Or: Special:UserRights → "Email new password" button (for other users)
+```
+
+**Via Database:**
+```bash
+psql -h 192.168.2.30 -U postgres -d mediawiki << 'EOF'
+-- Update user password (requires bcrypt hash)
+-- Use Special:ResetPassword in web interface instead (safer)
+UPDATE mediawiki.user
+SET user_password = ':pbkdf2:1000:HASH_HERE'
+WHERE user_name = 'Username';
+EOF
+```
+
+### User Permissions Quick Reference
+
+| Group | Permissions |
+|-------|-----------|
+| **user** (default) | Read pages, edit non-protected pages, upload files |
+| **sysop** | All permissions (edit protected pages, delete, block users) |
+| **bureaucrat** | Manage user groups and permissions |
+| **interface-admin** | Edit MediaWiki interface (CSS, JS, templates) |
+| **data-entry-staff** | Submit forms, create records |
+| **manager** | Review submissions, manage staff |
+| **inspector** | Read-only access to all records |
+
+### Testing New User Account
+
+```bash
+# Test login with new credentials
+~/.claude/skills/mediawiki-crud/mw-crud read "Main_Page" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "NewUsername" --password "NewPassword123"
+```
+
+---
+
 ## Current Project Status
 
 ### ✅ Completed (as of 2026-02-19)
