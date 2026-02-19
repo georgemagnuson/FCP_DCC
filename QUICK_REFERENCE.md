@@ -1,8 +1,8 @@
 # FCP_DCC Quick Reference
 
 **Project:** Food Control Plan Compliance Documentation & Diary System
-**Last Updated:** 2026-02-01
-**Status:** Phase 3 Complete: Standardized PageForms Pattern & Working Data Systems deployed
+**Last Updated:** 2026-02-19
+**Status:** Phase 5: mw-crud API operational, Breadcrumb navigation installed, MediaWiki fully restored
 
 ---
 
@@ -241,47 +241,100 @@ psql -h 192.168.2.30 -U postgres -d mediawiki < /tmp/backup_mediawiki_*.sql
 
 ## MediaWiki Page Creation Methods
 
-### Recommended: Direct SQL Database ✅
+### Recommended: mw-crud API Skill ✅
 
-**Status:** Works perfectly for page creation
+**Status:** Fully working (2026-02-19)
+**Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86` — SOLVED: MediaWiki API / mw-crud Fully Working
 
-**What works:**
-- Inserting records into `page` table ✓
-- Creating page structure directly ✓
-- Full control over content and metadata ✓
+```bash
+# Read a page
+~/.claude/skills/mediawiki-crud/mw-crud read "Page Title" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
 
-**What's complex:**
-- Must create entries in 5+ tables: `page`, `revision`, `text`, `content`, `slots`
-- Must maintain foreign key relationships correctly
-- Must get sequence IDs right (`rev_id`, `old_id`, `content_id`)
+# Create a page
+~/.claude/skills/mediawiki-crud/mw-crud create "New Page" \
+  --content "Page content here" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
 
-**Complexity:** HIGH (requires full schema knowledge)
+# Update a page
+~/.claude/skills/mediawiki-crud/mw-crud update "Page Title" \
+  --content "Updated content" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
 
-**Best for:** Bulk operations, automated imports, reliable page creation
+# Delete a page
+~/.claude/skills/mediawiki-crud/mw-crud delete "Page Title" \
+  --reason "No longer needed" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
+```
 
 **Advantages:**
-- Most reliable method
-- No caching issues
-- Full control over all page properties
-- Can batch multiple pages efficiently
+- Full edit history and audit trail in MediaWiki
+- Automatically updates SMW semantic indexes
+- Properly invalidates all caches
+- Handles CSRF tokens and conflict detection
+- No risk of revision sequence errors
 
-### Alternative Methods (Not Recommended)
+### Direct SQL Database ⚠️ AVOID FOR PAGE CONTENT
+
+**Status:** Use ONLY for schema/infrastructure queries — NOT for creating or editing pages.
+
+**Why not:** Direct SQL inserts bypass PostgreSQL sequences, causing `duplicate key` revision errors when MediaWiki next tries to write. Always run the sequence fix after any direct SQL page inserts:
+
+```sql
+-- Run this after ANY direct SQL inserts into MediaWiki tables
+SELECT setval('mediawiki.page_page_id_seq', (SELECT MAX(page_id) + 1 FROM mediawiki.page));
+SELECT setval('mediawiki.revision_rev_id_seq', (SELECT MAX(rev_id) + 1 FROM mediawiki.revision));
+SELECT setval('mediawiki.text_old_id_seq', (SELECT MAX(old_id) + 1 FROM mediawiki.text));
+SELECT setval('mediawiki.content_content_id_seq', (SELECT MAX(content_id) + 1 FROM mediawiki.content));
+```
+
+**Safe SQL uses:** Querying data, fixing sequences, checking page IDs, bulk data migrations with sequence fix.
+
+### Other Methods (Not Recommended)
 
 **PHP Maintenance Script (edit.php)** ❌
 - Has persistent bugs in MediaWiki 1.43.5
-- Returns conflicting error messages
-- Title existence checks fail against cache
 - Not recommended for production use
-
-**MediaWiki REST/API**
-- Works when authenticated
-- Requires CSRF token and session/API authentication
-- Less direct control than SQL
-- Good for web-based integrations
 
 ---
 
 ## Current Project Status
+
+### ✅ Completed (as of 2026-02-19)
+
+**Phase 5: MediaWiki Restoration & API Tooling (Completed 2026-02-19)**
+
+- **MediaWiki Fully Restored:**
+  - Fixed LocalSettings.php — skins and all extensions now load correctly
+  - Ran `maintenance/update.php` — created missing OATHAuth tables (`oathauth_devices`, `oathauth_types`)
+  - MediaWiki accessible at https://192.168.1.18/mediawiki/
+
+- **mw-crud API Skill — Fully Operational:**
+  - All CRUD operations working: Read, Create, Update, Delete
+  - Root cause of previous failures: missing OATHAuth database tables
+  - Memory Bank: `bfcb00aa-03eb-46b3-8710-8b9417b15c86`
+  - Skill location: `~/.claude/skills/mediawiki-crud/mw-crud`
+
+- **Semantic Breadcrumb Links Extension Installed:**
+  - Version 2.1.0-alpha, cloned from GitHub
+  - Breadcrumb trail renders in `mw-indicators` area above page title
+  - Format: `Parent / Level1 / CurrentPage` (all clickable links)
+  - Uses `[[Has parent page::ParentName]]` semantic property
+  - Also falls back to subpage notation (e.g. `Page/Subpage/SubSubpage`) automatically
+  - Configuration added to LocalSettings.php:
+    ```php
+    $GLOBALS['egSBLPropertySearchPatternByNamespace'] = [
+        NS_MAIN => ['Has parent page', 'Has parent page', 'Has parent page']
+    ];
+    ```
+
+- **Staff Training System Phase 1 (Completed 2026-02-16)**
+  - 21 pages deployed (IDs 370-390)
+  - See `STAFF_TRAINING_QUICK_REFERENCE.md` for details
 
 ### ✅ Completed (as of 2026-02-01)
 
@@ -514,45 +567,88 @@ psql -h 192.168.2.30 -U postgres -d mediawiki < /tmp/backup_mediawiki_*.sql
 ## Memory Bank
 
 **Database Location:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/memory-bank/context.db`
-**Document Count:** 141+ documents
+**Document Count:** 162+ documents
 **Schema Version:** v2.1
 
-### Key Documents (Priority Order - All 10/10 Importance)
+### Key Documents by UUID
+
+| UUID | Title | Importance |
+|------|-------|-----------|
+| `bfcb00aa-03eb-46b3-8710-8b9417b15c86` | **SOLVED: MediaWiki API / mw-crud Fully Working** — OATHAuth fix, sequence fix, all CRUD working | 10/10 |
+| `bfcb00aa` (same) | Covers: mw-crud authentication, OATHAuth missing tables fix, revision sequence fix | 10/10 |
+| `a71916ab-f6bd-4436-91d8-fbb5fd0bb686` | **MediaWiki Template Display Issue - RESOLVED** | 9/10 |
+| `b92649ba-adb5-41bc-8f92-bd0cbcc0f9e6` | **MediaWiki CRUD Skill - Updated with Conflict Detection** | 8/10 |
+
+### Key Documents (Priority Order)
+
+**2026-02-19 - API & Breadcrumbs:**
+- **SOLVED: MediaWiki API / mw-crud Fully Working** (`bfcb00aa`) — Root causes: missing OATHAuth tables + sequence sync. All CRUD operations confirmed working.
+
+**2026-02-16 - Staff Training System:**
+- **Staff Training System Phase 1** (9/10) - Full deployment, 21 pages (IDs 370-390)
 
 **2026-02-01 - Phase 3 Completion:**
-- **Standardized PageForms Pattern - Prefix-Based Semantic Grouping** (10/10) - Complete pattern documentation, checklist, and best practices for all data entry systems
-- **FCP_DCC Access Control Model - Confirmed** (10/10) - Two-layer permission system with LocalSettings.php configuration, user workflows, and implementation guide
-- **Working Business Details System - Complete Analysis** (10/10) - Reference pattern for form/template/portal page structure
-- **Item List System Documentation** (Reference) - Working test case demonstrating standardized pattern
-
-**2026-01-30:**
-- **Phase 2 Deployment: Complete Technical Documentation** (2026-01-30) - Full deployment details, SMW properties, form template updates
-- **Phase 3 Implementation Plan: Records Archive System with SMW Queries** (2026-01-30) - Planning document for next phase
-
-**2026-01-26:**
-- **Dark Blue Remaining Sections** (2026-01-26) - Complete specifications for FCP Sections 4-11, ready for MediaWiki implementation
-- **MediaWiki Pages Inventory** (2026-01-26) - Status of all FCP translation pages
+- **Standardized PageForms Pattern** (10/10) - Pattern for all data entry systems
+- **FCP_DCC Access Control Model** (10/10) - Two-layer permission system
+- **Working Business Details System** (10/10) - Reference pattern for form/template/portal
 
 ### Quick Searches
 ```
-- "dark blue" - Section specifications and implementation status
-- "state of project" - Project overview and status
-- "network topology" - Complete infrastructure details
+- "mw-crud" or "CRUD" - API skill usage and troubleshooting
+- "OATHAuth" - Authentication fix procedures
+- "sequence" - PostgreSQL sequence sync fix
+- "breadcrumb" - Semantic Breadcrumb Links setup
+- "dark blue" - FCP Section specifications
 - "page forms" - MediaWiki extension guides
-- "business details" - Schema specifications (pages 7-10)
-- "template" - MediaWiki template implementation notes
-- "color scheme" - CSS implementation details
+- "business details" - Schema specifications
+- "staff training" - Training system docs
 ```
 
 ---
 
 ## Troubleshooting
 
+### mw-crud API Authentication Fails — OATHAuth Error
+**Symptom:** `internal_api_error_DBQueryError: relation "oathauth_devices" does not exist`
+**Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86`
+
+**Cause:** OATHAuth extension loaded but database tables not yet created.
+
+**Fix:**
+```bash
+ssh 192.168.2.10 'cd /usr/local/www/mediawiki && sudo -u www php maintenance/update.php --quick'
+```
+
+**Diagnose any API error with debug logging:**
+```php
+# Add temporarily to LocalSettings.php, remove when done
+$wgDebugLogFile = "/tmp/mediawiki-debug.log";
+$wgDebugLogGroups = ["DBQuery" => "/tmp/mediawiki-dbquery.log"];
+```
+```bash
+ssh 192.168.2.10 'grep -i "error\|exception" /tmp/mediawiki-debug.log | tail -30'
+```
+
+### MediaWiki Revision Errors After Direct SQL Inserts
+**Symptom:** `duplicate key value violates unique constraint "revision_pkey"`
+**Cause:** Direct SQL inserts bypass PostgreSQL sequences, leaving them out of sync.
+
+**Fix — always run after direct SQL inserts:**
+```bash
+psql -h 192.168.2.30 -U postgres -d mediawiki << 'EOF'
+SELECT setval('mediawiki.page_page_id_seq', (SELECT MAX(page_id) + 1 FROM mediawiki.page));
+SELECT setval('mediawiki.revision_rev_id_seq', (SELECT MAX(rev_id) + 1 FROM mediawiki.revision));
+SELECT setval('mediawiki.text_old_id_seq', (SELECT MAX(old_id) + 1 FROM mediawiki.text));
+SELECT setval('mediawiki.content_content_id_seq', (SELECT MAX(content_id) + 1 FROM mediawiki.content));
+EOF
+```
+
+**Prevention:** Use mw-crud API for all page creation/editing. See **MediaWiki Page Creation Methods** above.
+
 ### MediaWiki Template Issues
 1. Check ParserFunctions is enabled in LocalSettings.php
 2. Clear cache: `php maintenance/purgeList.php --db-touch`
 3. Run jobs: `php maintenance/runJobs.php`
-4. Check Apache error log: `tail -f /var/log/apache24/error.log`
 
 ### Database Connection Issues
 1. Verify PostgreSQL is running: `sudo service postgresql status`
