@@ -245,30 +245,41 @@ psql -h 192.168.2.30 -U postgres -d mediawiki < /tmp/backup_mediawiki_*.sql
 
 **Status:** Fully working (2026-02-19)
 **Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86` — SOLVED: MediaWiki API / mw-crud Fully Working
+**Credentials:** See `.env` file (`MEDIAWIKI_USERNAME` and `MEDIAWIKI_PASSWORD`)
 
 ```bash
+# Get credentials from .env
+source .env
+
 # Read a page
 ~/.claude/skills/mediawiki-crud/mw-crud read "Page Title" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 
 # Create a page
 ~/.claude/skills/mediawiki-crud/mw-crud create "New Page" \
   --content "Page content here" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 
 # Update a page
 ~/.claude/skills/mediawiki-crud/mw-crud update "Page Title" \
   --content "Updated content" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 
 # Delete a page
 ~/.claude/skills/mediawiki-crud/mw-crud delete "Page Title" \
   --reason "No longer needed" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
+```
+
+**Or use placeholder (replace with actual values from .env):**
+```bash
+~/.claude/skills/mediawiki-crud/mw-crud read "Page Title" \
+  --url "$MEDIAWIKI_API_URL" \
+  --username "Georgemagnuson" --password "[See .env: MEDIAWIKI_PASSWORD]"
 ```
 
 **Advantages:**
@@ -303,6 +314,12 @@ SELECT setval('mediawiki.content_content_id_seq', (SELECT MAX(content_id) + 1 FR
 ---
 
 ## MediaWiki User Creation & Management
+
+⚠️ **IMPORTANT:** All credentials are stored in `.env` file (not committed to git). See `.env` for:
+- `MEDIAWIKI_USERNAME` - Admin user for API operations
+- `MEDIAWIKI_PASSWORD` - Admin password for API operations
+- `MEDIAWIKI_API_URL` - API endpoint URL
+- `MEDIAWIKI_URL` - Web interface URL
 
 ### Important: MediaWiki vs PostgreSQL Users
 
@@ -342,17 +359,21 @@ SELECT setval('mediawiki.content_content_id_seq', (SELECT MAX(content_id) + 1 FR
 
 ### Create Users via MediaWiki API
 
-**Create a basic user account:**
+**Create a basic user account (using .env credentials):**
 ```bash
+# Load credentials from .env
+source .env
+
 # Using mw-crud (simpler method)
 ~/.claude/skills/mediawiki-crud/mw-crud create "User:NewUsername" \
   --content "New user account" \
-  --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --url "$MEDIAWIKI_API_URL" \
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 ```
 
 **Create user with API token (advanced):**
 ```bash
+# Credentials in .env file
 curl -X POST "http://192.168.2.10/mediawiki/api.php" \
   -d "action=createaccount" \
   -d "lgname=NewUsername" \
@@ -377,17 +398,18 @@ curl -X POST "http://192.168.2.10/mediawiki/api.php" \
 ### Query Existing Users
 
 ```bash
-# From database
+# From database (uses .pgpass)
 psql -h 192.168.2.30 -U postgres -d mediawiki << 'EOF'
 SELECT user_id, user_name, user_email, user_registration
 FROM mediawiki.user
 ORDER BY user_id;
 EOF
 
-# From MediaWiki API
+# From MediaWiki API (use .env credentials)
+source .env
 ~/.claude/skills/mediawiki-crud/mw-crud read "Special:ListUsers" \
-  --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --url "$MEDIAWIKI_API_URL" \
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 ```
 
 ### Reset User Password
@@ -424,10 +446,12 @@ EOF
 ### Testing New User Account
 
 ```bash
-# Test login with new credentials
+# Test login with new credentials (from .env or direct entry)
+source .env
 ~/.claude/skills/mediawiki-crud/mw-crud read "Main_Page" \
-  --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "NewUsername" --password "NewPassword123"
+  --url "$MEDIAWIKI_API_URL" \
+  --username "NewUsername" --password "NewUserPassword"
+# Note: Replace NewUserPassword with the actual password set when creating the user
 ```
 
 ---
