@@ -860,6 +860,11 @@ $wgGroupPermissions['*']['read'] = false;
 - Anonymous users accessing `/index.php/Main_Page` are redirected to `Jitsu_Home`
 - Authenticated users can access Main_Page normally
 
+**Logout Redirect Hook:**
+- Authenticated users are redirected to `Jitsu_Home` landing page after logging out
+- Uses `UserLogoutComplete` hook with 302 (temporary) redirect
+- Clears session and returns user to public landing page
+
 ### Configuration File Location
 
 **File:** `/usr/local/www/mediawiki/LocalSettings.php` (on 192.168.2.10)
@@ -890,8 +895,14 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 
 **Test authenticated access (requires login):**
 1. Login at: http://192.168.2.10/mediawiki/Special:UserLogin
-2. Use credentials: Username = `Georgemagnuson`, Password = `TestPassword123`
+2. Use credentials: Username = `Georgemagnuson`, Password = (see `.env` file: `MEDIAWIKI_PASSWORD`)
 3. Navigate to Main_Page — should be fully accessible
+
+**Test logout redirect:**
+1. After login, navigate to: http://192.168.2.10/mediawiki/Special:UserLogout
+2. Should redirect to Jitsu_Home landing page
+3. Should see "Log In" button (anonymous view)
+4. Verify session is cleared (cannot access Main_Page without re-login)
 
 ### Rollback Procedure
 
@@ -911,7 +922,7 @@ sudo service apache24 restart
 # 4. (Optional) Delete landing page if not needed
 export MEDIAWIKI_API_URL="http://192.168.2.10/mediawiki/api.php"
 export MEDIAWIKI_USERNAME="Georgemagnuson"
-export MEDIAWIKI_PASSWORD="TestPassword123"
+export MEDIAWIKI_PASSWORD="[from .env: MEDIAWIKI_PASSWORD]"
 
 ~/.claude/skills/mediawiki-crud/mw-crud delete "Jitsu_Home" \
   --reason "Rollback" \
