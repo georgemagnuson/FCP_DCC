@@ -818,6 +818,110 @@ EOF
 
 ---
 
+## MediaWiki Access Control Configuration
+
+### Overview (Implemented 2026-02-19)
+
+**Purpose:** Protect sensitive FCP compliance documentation (employee records, temperature logs, incident reports) while providing a professional branded entry point for authorized users.
+
+**Status:** ✅ ACTIVE
+
+**Configuration:**
+- Anonymous users redirected to `Jitsu_Home` landing page
+- All content except landing page requires authentication
+- Existing `Main_Page` preserved as comprehensive portal for authenticated users
+
+### Jitsu_Home Landing Page (Page ID: 10013)
+
+**Features:**
+- Minimal design with centered Jitsu logo (192×192px)
+- Conditional content using ParserFunctions:
+  - **Anonymous users:** See "Log In" button (redirects to Special:UserLogin)
+  - **Authenticated users:** See "Enter System" button (links to Main_Page)
+- Dark blue theme (#1a3a52) matching FCP color scheme
+- No table of contents or edit sections
+
+**Location:** `http://192.168.2.10/mediawiki/index.php/Jitsu_Home`
+
+### Access Control Rules (LocalSettings.php)
+
+**Disabled Anonymous Reading:**
+```php
+$wgGroupPermissions['*']['read'] = false;
+```
+
+**Whitelisted Public Pages:**
+1. Landing page: `Jitsu_Home`
+2. Authentication pages: `Special:UserLogin`, `Special:UserLogout`, `Special:PasswordReset`, `Special:ChangePassword`
+3. System CSS/JS: `MediaWiki:Common.css`, `MediaWiki:Common.js`, `MediaWiki:Vector.css`, `MediaWiki:Vector.js`
+4. Logo images: `File:Jitsu_logo_192x192.png`, `File:Jitsu_logo_135x135.png`
+
+**Main Page Redirect Hook:**
+- Anonymous users accessing `/index.php/Main_Page` are redirected to `Jitsu_Home`
+- Authenticated users can access Main_Page normally
+
+### Configuration File Location
+
+**File:** `/usr/local/www/mediawiki/LocalSettings.php` (on 192.168.2.10)
+
+**Backup:** `/usr/local/www/mediawiki/LocalSettings.php.backup-YYYYMMDD-HHMMSS` (created before modification)
+
+**To modify access control:**
+1. SSH to 192.168.2.10
+2. Edit `/usr/local/www/mediawiki/LocalSettings.php`
+3. Update `$wgGroupPermissions` or `$wgWhitelistRead` array as needed
+4. Clear cache: `php maintenance/purgeList.php --db-touch`
+5. Restart Apache: `sudo service apache24 restart`
+
+### Testing Access Control
+
+**Test anonymous access to landing page:**
+```bash
+curl -s http://192.168.2.10/mediawiki/index.php/Jitsu_Home | grep -o "Jitsu_logo\|Welcome"
+# Expected: Jitsu_logo and Welcome text present
+```
+
+**Test anonymous access to protected content:**
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  http://192.168.2.10/mediawiki/index.php/Special:SpecialPages
+# Expected: 403 (Forbidden) or 401 (Unauthorized)
+```
+
+**Test authenticated access (requires login):**
+1. Login at: http://192.168.2.10/mediawiki/Special:UserLogin
+2. Use credentials: Username = `Georgemagnuson`, Password = `TestPassword123`
+3. Navigate to Main_Page — should be fully accessible
+
+### Rollback Procedure
+
+**If access control causes issues:**
+
+```bash
+# 1. SSH to server
+ssh 192.168.2.10
+
+# 2. Restore backup
+sudo cp /usr/local/www/mediawiki/LocalSettings.php.backup-YYYYMMDD-HHMMSS \
+        /usr/local/www/mediawiki/LocalSettings.php
+
+# 3. Restart Apache
+sudo service apache24 restart
+
+# 4. (Optional) Delete landing page if not needed
+export MEDIAWIKI_API_URL="http://192.168.2.10/mediawiki/api.php"
+export MEDIAWIKI_USERNAME="Georgemagnuson"
+export MEDIAWIKI_PASSWORD="TestPassword123"
+
+~/.claude/skills/mediawiki-crud/mw-crud delete "Jitsu_Home" \
+  --reason "Rollback" \
+  --url "$MEDIAWIKI_API_URL" \
+  --username "$MEDIAWIKI_USERNAME" \
+  --password "$MEDIAWIKI_PASSWORD"
+```
+
+---
+
 ## Important Notes
 
 - All systems use FreeBSD with jail infrastructure
