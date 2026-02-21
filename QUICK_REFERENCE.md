@@ -933,7 +933,175 @@ export MEDIAWIKI_PASSWORD="[from .env: MEDIAWIKI_PASSWORD]"
 
 ---
 
-## Important Notes
+## Namespace-Based Security Architecture
+
+### Overview (Implemented 2026-02-20)
+
+**Purpose:** Segregate data by confidentiality level using custom MediaWiki namespaces with role-based access controls.
+
+**Status:** ✅ FULLY OPERATIONAL (Phases 1-6 Complete, Tested)
+
+**Implementation Date:** 2026-02-20
+**Memory Bank:** `e06440d3-f035-4d91-bb27-7e3b0b3a1f6c` (Importance: 10/10)
+
+### Custom Namespaces
+
+| Namespace | ID | Purpose | Employee Access | Manager Access | Inspector Access |
+|-----------|-----|---------|----------------|----------------|------------------|
+| **FCP_MAIN** | 3000 | Food Control Plan docs | Read only | Read only | Read only |
+| **FCP_FORMS** | 3002 | Form templates | Read only | Read/Edit | Read only |
+| **JITSU_DATA** | 3004 | Operational data (collaborative) | Read/Edit | Read/Edit | Read only |
+| **JITSU_EMPLOYEES** | 3006 | Employee HR records | ❌ Blocked | Read/Edit | ❌ Blocked |
+| **JITSU_EMPLOYEES_TRAINING** | 3008 | Training records (per-user) | Own only* | Read/Edit | Read only |
+| **JITSU_CONFIDENTIAL** | 3010 | Business-sensitive data | ❌ Blocked | Read/Edit | ❌ Blocked |
+| **JITSU_REPORTS** | 3012 | Reports and summaries | Read only | Read/Edit | Read only |
+
+*Employees can only access their own training records via Semantic ACL (e.g., JITSU_EMPLOYEES_TRAINING:Carlos_Chef/*)
+
+### User Groups
+
+| Group | Database Name | Purpose | Key Permissions |
+|-------|--------------|---------|----------------|
+| **Employee** | `data_recorder` | Staff who submit forms | Read FCP, edit JITSU_DATA, own training only |
+| **Manager** | `data_editor` | Supervisors | Full access to employees, confidential data, forms |
+| **Inspector** | `inspector` | Food safety auditors | Read-only access (no employee HR or confidential) |
+| **Admin** | `sysop` | System administrators | Full access to everything including templates |
+
+### Security Extensions
+
+**Lockdown Extension** (Namespace-wide restrictions)
+- Controls read/write access by namespace
+- Enforces group-based permissions
+- Configuration: LocalSettings.php lines 420-455
+
+**Semantic ACL Extension** (Per-page restrictions)
+- Fine-grained access control using semantic properties
+- Example: `[[Visible to::User:Carlos_Chef]]`
+- Used for training records (employees see only their own)
+
+### Page Naming Conventions
+
+**FCP Content:**
+```
+FCP_MAIN:Section/Topic
+Example: FCP_MAIN:Closing/Cleaning_up
+```
+
+**Employee Records:**
+```
+JITSU_EMPLOYEES:FirstName_LastName
+Example: JITSU_EMPLOYEES:Carlos_Chef
+```
+
+**Training Records:**
+```
+JITSU_EMPLOYEES_TRAINING:EmployeeName/Section
+Example: JITSU_EMPLOYEES_TRAINING:Carlos_Chef/Personal_Hygiene
+```
+
+**Operational Data:**
+```
+JITSU_DATA:DataType/Identifier/Date
+Example: JITSU_DATA:Temperature/Walk-in_Cooler/2026-02-20
+```
+
+**Reports:**
+```
+JITSU_REPORTS:ReportName
+Example: JITSU_REPORTS:Employee_Training_Status
+```
+
+### Access Control Testing
+
+**Test Accounts (Password: TestPassword123):**
+- Carlos Chef (data_recorder) - Employee access
+- Sarah Manager (data_editor) - Manager access
+- Tom Waiter (data_recorder) - Employee access
+- Test Inspector (inspector) - Read-only inspector access
+- Georgemagnuson (sysop) - Full admin access
+
+**Test Results (2026-02-20):**
+- ✅ Employees blocked from HR records (JITSU_EMPLOYEES)
+- ✅ Employees blocked from confidential data (JITSU_CONFIDENTIAL)
+- ✅ Employees can read/edit collaborative data (JITSU_DATA)
+- ✅ Managers can access all employee and confidential data
+- ✅ Inspectors have read-only access (cannot edit anything)
+- ✅ Semantic ACL restricts training records to employee + managers
+- ✅ Sysops have full access including template editing
+
+### Configuration Files
+
+**LocalSettings.php Sections:**
+- Lines 107-164: Custom namespace definitions
+- Line ~407: Sysop group permissions (CRITICAL)
+- Lines 420-455: Lockdown namespace permissions
+- Following: Semantic ACL configuration
+- End of file: Namespace protection settings
+
+**Backup Files:**
+- `/usr/local/www/mediawiki/LocalSettings.php.backup-20260220-202505` (pre-implementation)
+- `/usr/local/www/mediawiki/LocalSettings.php.backup-before-namespaces`
+- Multiple timestamped backups available
+
+### Common Operations
+
+**Create a training record:**
+```bash
+~/.claude/skills/mediawiki-crud/mw-crud create \
+  "JITSU_EMPLOYEES_TRAINING:Carlos_Chef/Food_Safety" \
+  --content "Training completion record" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
+```
+
+**Create an employee record:**
+```bash
+~/.claude/skills/mediawiki-crud/mw-crud create \
+  "JITSU_EMPLOYEES:New_Employee" \
+  --content "{{Employee|employee_name=New Employee|position=Cook}}" \
+  --url "http://192.168.2.10/mediawiki/api.php" \
+  --username "Georgemagnuson" --password "TestPassword123"
+```
+
+**Query user groups:**
+```bash
+ssh 192.168.2.10 'cd /usr/local/www/mediawiki && sudo -u www php maintenance/run.php sql \
+  --query="SELECT u.user_name, ug.ug_group FROM mediawiki.user u JOIN mediawiki.user_groups ug ON u.user_id = ug.ug_user ORDER BY u.user_name;"'
+```
+
+### Semantic ACL Examples
+
+**Training record template with per-user access:**
+```wiki
+<includeonly>
+<!-- Training completion data -->
+{{#cargo_store:_table=training_completions
+|employee_name={{{employee_name|}}}
+|training_section={{{training_section|}}}
+}}
+
+<!-- Access Control -->
+[[Visible to::User:{{{employee_name|}}}]]
+[[Visible to::Group:data_editor]]
+[[Editable by::Group:data_editor]]
+
+[[Category:Training_Completion]]
+</includeonly>
+```
+
+**Confidential report with manager-only access:**
+```wiki
+Confidential business information here.
+
+[[Visible to::Group:data_editor]]
+[[Visible to::Group:sysop]]
+
+[[Category:Confidential]]
+```
+
+---
+
+## Technical Notes
 
 - All systems use FreeBSD with jail infrastructure
 - Key-based SSH authentication only (no password login)
