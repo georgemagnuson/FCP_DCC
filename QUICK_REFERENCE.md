@@ -1,8 +1,7 @@
 # FCP_DCC Quick Reference
 
 **Project:** Food Control Plan Compliance Documentation & Diary System
-**Last Updated:** 2026-02-19
-**Status:** Phase 5: mw-crud API operational, Breadcrumb navigation installed, MediaWiki fully restored
+**Purpose:** Operational reference for MediaWiki system access, configuration, and usage
 
 ---
 
@@ -455,217 +454,85 @@ source .env
 ```
 
 ---
+---
 
-## Current Project Status
+## Breadcrumb Navigation
 
-### ✅ Completed (as of 2026-02-19)
+**Extension:** Semantic Breadcrumb Links 2.1.0-alpha  
+**Method:** Subpage notation (slash-based hierarchy)  
+**Rendering:** Breadcrumb trail appears in `mw-indicators` area above page title
 
-**Phase 5: MediaWiki Restoration & API Tooling (Completed 2026-02-19)**
+**How to Use:**
+- Create pages using slash notation: `Parent/Child/Grandchild`
+- Parent pages must exist as actual wiki pages for clickable links
+- Format automatically shows: `Parent / Child / Grandchild`
+- Current page displays as plain text, parents are clickable links
 
-- **MediaWiki Fully Restored:**
-  - Fixed LocalSettings.php — skins and all extensions now load correctly
-  - Ran `maintenance/update.php` — created missing OATHAuth tables (`oathauth_devices`, `oathauth_types`)
-  - MediaWiki accessible at https://192.168.1.18/mediawiki/
+**Examples:**
+```
+FCP/Closing/Cleaning_up → Shows: FCP / Closing / Cleaning_up
+Form/Daily_Pest_Inspection → Shows: Form / Daily Pest Inspection
+Training/Safety_Basics → Shows: Training / Safety Basics
+```
 
-- **mw-crud API Skill — Fully Operational:**
-  - All CRUD operations working: Read, Create, Update, Delete
-  - Root cause of previous failures: missing OATHAuth database tables
-  - Memory Bank: `bfcb00aa-03eb-46b3-8710-8b9417b15c86`
-  - Skill location: `~/.claude/skills/mediawiki-crud/mw-crud`
+**Configuration:**  
+Located in `/usr/local/www/mediawiki/LocalSettings.php`:
+```php
+wfLoadExtension( 'SemanticBreadcrumbLinks' );
+$GLOBALS['egSBLPropertySearchPatternByNamespace'] = [
+    NS_MAIN => ['Has parent page', 'Has parent page', 'Has parent page']
+];
+```
 
-- **Semantic Breadcrumb Links Extension Installed:**
-  - Version 2.1.0-alpha, cloned from GitHub
-  - Breadcrumb trail renders in `mw-indicators` area above page title
-  - Format: `Parent / Level1 / CurrentPage` (all clickable links)
-  - Uses `[[Has parent page::ParentName]]` semantic property
-  - Also falls back to subpage notation (e.g. `Page/Subpage/SubSubpage`) automatically
-  - Configuration added to LocalSettings.php:
-    ```php
-    $GLOBALS['egSBLPropertySearchPatternByNamespace'] = [
-        NS_MAIN => ['Has parent page', 'Has parent page', 'Has parent page']
-    ];
-    ```
-
-- **Staff Training System Phase 1 (Completed 2026-02-16)**
-  - 21 pages deployed (IDs 370-390)
-  - See `STAFF_TRAINING_QUICK_REFERENCE.md` for details
-
-### ✅ Completed (as of 2026-02-01)
-
-**Phase 1: Record Management Pages (Completed 2026-01-30)**
-- Daily_Records (page_id: 230) - 16 form links
-- Weekly_Records (page_id: 231) - 9 form links
-- Monthly_Records (page_id: 232) - 4 form links
-- Incident_Records (page_id: 233) - 8 form links
-- Total: 37 form links across 4 organized pages
-
-**Phase 3: Records Archive System with SMW Queries (Completed 2026-01-31)**
-
-- **5 Archive Pages Created** (page_id 313-317):
-  - Records_Archive (313) - Main hub with navigation and summary statistics
-  - Records_Archive/Daily (314) - Today's submitted records with pass/fail counts
-  - Records_Archive/Weekly (315) - Last 7 days with failure tracking and trends
-  - Records_Archive/Monthly (316) - Last 30 days with incident severity tracking
-  - Records_Archive/Search (317) - Advanced search with multiple filter options
-
-- **40+ SMW Queries Deployed:**
-  - Date-based filtering (today, 7 days, 30 days, 60 days, 90 days)
-  - Status filtering (Pass/Fail)
-  - Severity filtering (Critical, High, Medium)
-  - Form type filtering (temperature, maintenance, incidents)
-  - Staff tracking and performance views
-  - Temperature monitoring queries
-
-- **SMW Query Patterns Used:**
-  ```wiki
-  {{#ask: [[Has_submission_date::{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY}}]] }}
-  {{#ask: [[Has_submission_date::>{{#time:Y-m-d|now -7 days}}]] }}
-  {{#ask: [[Has_pass_fail_status::Pass]] [[Has_submission_date::>{{#time:Y-m-d|now -30 days}}]] }}
-  {{#ask: [[Has_incident_severity::Critical]] OR [[Has_incident_severity::High]] }}
-  ```
-
-- **Deployment Details:**
-  - Database: mediawiki on 192.168.2.30
-  - Backup created: `/tmp/backup_mediawiki_before_phase3_20260131_*.sql`
-  - Atomic transaction: All 25 INSERT operations successful
-  - Cache cleared: `php maintenance/purgeList.php --db-touch`
-  - Job queue processed: `php maintenance/runJobs.php`
-
-- **Testing Status:**
-  - All pages accessible and verified
-  - All SMW queries syntactically correct
-  - Ready for form submission testing
-  - Pages display "No records" until data is submitted (expected behavior)
-
-**Phase 2: SMW Properties & Form Templates (Completed 2026-01-30, Deployed to Production)**
-- **12 SMW Properties Created & Deployed:**
-  1. Has_submission_date
-  2. Has_record_type
-  3. Has_staff_name
-  4. Has_form_name
-  5. Has_temperature
-  6. Has_temperature_unit
-  7. Has_equipment_unit
-  8. Has_food_item
-  9. Has_pass_fail_status
-  10. Has_corrective_action
-  11. Has_incident_severity
-  12. Has_investigation_status
-
-- **30 Form Templates Updated with SMW Annotations:**
-  - Orange Section (7 templates): Temperature Monitoring, Equipment Log, Daily Checklist, Facility Inspection, Staff Training, Maintenance Request, Cleaning Schedule
-  - Purple Section (9 templates): Vendor Documentation, Supplier Audit, Product Receipt, Quality Verification, Lot Tracking, Certificate of Analysis, Supplier Contact, Product Specification, Safety Data Sheet
-  - Red Section (8 templates): Incident Report, Non-Conformance, Corrective Action, Root Cause Analysis, Investigation, Follow-up, Escalation, Closure
-  - Teal Section (6 templates): SOP Implementation, Process Documentation, Staff Competency, Training Assessment, Procedure Review, Knowledge Transfer
-
-- **Production Deployment:**
-  - Deployment Date: 2026-01-30
-  - Database Pages: 301-312 (12 dedicated infrastructure pages)
-  - Git Commits: cd8af49, 5ef768b, 0862f36
-  - Backup Location: /tmp/backup_mediawiki_before_phase2_20260130_181128.sql
-  - All properties indexed and queryable in production
-
-**MediaWiki Implementation:**
-- Template:BusinessDetails - Production ready with conditional display
-- ParserFunctions extension enabled and working
-- Business entry form: FCP:Setting_Up:Business_details
-- 2 business pages created (The Jitsu Ltd)
-- Category cleanup completed
-- SMW cache and semantic index rebuilt
-
-**Dark Blue Sections Documentation:**
-- Sections 4-11 fully documented and ready for MediaWiki implementation (created 2026-01-26)
-- Complete specifications for: Business Layout, Risk Management, Taking Responsibility, Plan Monitoring, Training & Competency, Equipment & Facilities, Water Supply (Registered), Water Supply (Self-Supply)
-- SMW properties identified for each section
-- Forms and templates designed
-
-**Infrastructure:**
-- PostgreSQL 17.0 on postgresqljail fully operational
-- MediaWiki 1.43.5 + SMW + PageForms + ParserFunctions fully configured
-- Database schema up-to-date and verified
-- Wiki.js deployed and connected to PostgreSQL
-- Django BI application stable and operational
-- Apache 2.4 running on llamajail with all services operational
-
-**Phase 3: Standardized PageForms Pattern & Working Data Systems (Completed 2026-02-01)**
-
-- **Standardized PageForms Pattern Established:**
-  - ✅ `default form=[Prefix]:` parameter for semantic grouping (forminput-level naming)
-  - ✅ Removed `{{{info}}}` tag approach (form-level naming) - less flexible
-  - ✅ Pattern supports future scalability with multiple data types
-  - ✅ Complete documentation saved to Memory Bank (10/10 importance)
-
-- **Item List System - Working Test Case:**
-  - ✅ Item_List portal page with categorytree and form input (page_id: 352)
-  - ✅ Form:Item - Standardized form definition (page_id: 346)
-  - ✅ Template:Item - Display template (page_id: 347)
-  - ✅ Category:Item - Category organization (page_id: 348)
-  - ✅ Successfully tested: Create Item:Laptop entry via form
-  - ✅ Verified categorytree listing works with cache refresh
-
-- **Equipment Registry System - Production Ready:**
-  - ✅ Equipment_Registry_Documentation portal page (page_id: 329)
-  - ✅ Form:Equipment_Registry - Full equipment form with 8 fields (page_id: 319)
-  - ✅ Template:Equipment - Equipment display template with SMW properties (page_id: 335)
-  - ✅ Category:Equipment - Equipment category organization
-  - ✅ Tested: Create Equipment:FRIDGE-01 entry via form
-  - ✅ Uses standardized `default form=Equipment:` parameter
-
-- **Access Control Model - Confirmed:**
-  - ✅ Two-layer permission system documented
-  - ✅ System Structure (Admin only): Templates, Forms, Portal Pages
-  - ✅ Data Entry (Role-based): Staff create/edit own data, Manager oversee all, Inspector read-only
-  - ✅ MediaWiki LocalSettings.php configuration documented
-  - ✅ User group structure: data-entry-staff, manager, inspector, sysop
-  - ✅ Complete implementation guide saved to Memory Bank (10/10 importance)
-
-- **SSH & Database Access Improvements:**
-  - ✅ Simplified SSH commands tested: `ssh 192.168.2.30`, `ssh 192.168.2.10`
-  - ✅ Password-less psql access verified: `psql -U postgres -d mediawiki`
-  - ✅ Both commands excluded from git/history (no credentials exposed)
-
-### 🔄 In Progress
-
-- **ACTIVE:** Testing Records Archive System with form submissions
-- Implementing Dark Blue sections (4-11) as MediaWiki pages
-- Additional business page entries
-- User permissions and access control
-
-### 📋 Planned Next Steps
-
-**Phase 4 (Next):** Test & Deploy Dark Blue Sections
-1. Create 8 Dark Blue section pages (Business Layout, Risk Management, Responsibility, Plan Monitoring, Training & Competency, Equipment & Facilities, Water Supply - Registered, Water Supply - Self-Supply)
-2. Test Records Archive pages with real form submission data
-3. Configure staff and manager access to archive pages
-4. Monitor query performance with live data
-
-**Phase 5:** Integration & Compliance (Final)
-1. Update Food_Control_Records main page with Records_Archive link
-2. Test end-to-end workflow (form entry → archive view)
-3. Configure inspector access and review features
-4. Build compliance reporting dashboards
-5. Implement staff notification system
-
-**Phase 5:** Integration & Compliance (Final)
-1. Update Food_Control_Records main page with Record Management & Archive navigation
-2. Test end-to-end workflow (form entry → archive view)
-3. Configure inspector access and review features
-4. Build compliance reporting dashboards
-5. Implement staff notification system
-
-**High Priority (Parallel Track):** Dark Blue Sections Implementation
-1. Create 8 Dark Blue section pages (FCP:Setting_Up:Business_layout, Risk_management, Responsibility, Plan_monitoring, Training_competency, Equipment_facilities, Water_supply_registered, Water_supply_self_supply)
-2. Create business logo/image upload capability
-3. Build compliance reporting dashboards
-
-**Standardized Pattern Ready For:**
-- Temperature Registry (uses same form/template/portal pattern)
-- Supplier Registry
-- Staff Directory
-- Training Records
-- Any future data management system (reusable template)
+**For Migration Details:** See Memory Bank UUID `75e5e63d-6e92-44ca-82cc-832c72a288b1`
 
 ---
+
+## SMW Query Patterns
+
+**Purpose:** Query submitted form data using Semantic MediaWiki
+
+**Common Patterns:**
+```wiki
+# Today's records
+{{#ask: [[Has_submission_date::{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY}}]] }}
+
+# Last 7 days
+{{#ask: [[Has_submission_date::>{{#time:Y-m-d|now -7 days}}]] }}
+
+# Pass/Fail filtering
+{{#ask: [[Has_pass_fail_status::Pass]] [[Has_submission_date::>{{#time:Y-m-d|now -30 days}}]] }}
+
+# Severity filtering
+{{#ask: [[Has_incident_severity::Critical]] OR [[Has_incident_severity::High]] }}
+```
+
+**Available SMW Properties:**
+- `Has_submission_date`, `Has_record_type`, `Has_staff_name`, `Has_form_name`
+- `Has_temperature`, `Has_temperature_unit`, `Has_equipment_unit`
+- `Has_food_item`, `Has_pass_fail_status`, `Has_corrective_action`
+- `Has_incident_severity`, `Has_investigation_status`
+
+---
+
+## PageForms Pattern
+
+**Standardized Pattern for Data Entry Systems:**
+
+1. **Form:** `Form:DataType` (defines input fields)
+2. **Template:** `Template:DataType` (displays submitted data)
+3. **Category:** `Category:DataType` (organizes entries)
+4. **Portal Page:** Hub page with form input and category tree
+
+**Form Input Tag:**
+```wiki
+{{#forminput:form=DataType|placeholder=Enter name|button text=Create DataType}}
+```
+
+**Parameter:** Use `default form=Prefix:` for semantic grouping (e.g., `default form=Equipment:`)
+
+**For Details:** See Memory Bank for "Standardized PageForms Pattern" documentation
+
 
 ## MediaWiki Extensions
 
@@ -720,43 +587,48 @@ source .env
 
 ## Memory Bank
 
+**Purpose:** Persistent knowledge base for project history, implementation details, and troubleshooting guides
 **Database Location:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/memory-bank/context.db`
-**Document Count:** 162+ documents
-**Schema Version:** v2.1
+**Schema Version:** v3.0 (with relationship tracking)
 
-### Key Documents by UUID
+### How to Use Memory Bank
 
-| UUID | Title | Importance |
-|------|-------|-----------|
-| `bfcb00aa-03eb-46b3-8710-8b9417b15c86` | **SOLVED: MediaWiki API / mw-crud Fully Working** — OATHAuth fix, sequence fix, all CRUD working | 10/10 |
-| `bfcb00aa` (same) | Covers: mw-crud authentication, OATHAuth missing tables fix, revision sequence fix | 10/10 |
-| `a71916ab-f6bd-4436-91d8-fbb5fd0bb686` | **MediaWiki Template Display Issue - RESOLVED** | 9/10 |
-| `b92649ba-adb5-41bc-8f92-bd0cbcc0f9e6` | **MediaWiki CRUD Skill - Updated with Conflict Detection** | 8/10 |
-
-### Key Documents (Priority Order)
-
-**2026-02-19 - API & Breadcrumbs:**
-- **SOLVED: MediaWiki API / mw-crud Fully Working** (`bfcb00aa`) — Root causes: missing OATHAuth tables + sequence sync. All CRUD operations confirmed working.
-
-**2026-02-16 - Staff Training System:**
-- **Staff Training System Phase 1** (9/10) - Full deployment, 21 pages (IDs 370-390)
-
-**2026-02-01 - Phase 3 Completion:**
-- **Standardized PageForms Pattern** (10/10) - Pattern for all data entry systems
-- **FCP_DCC Access Control Model** (10/10) - Two-layer permission system
-- **Working Business Details System** (10/10) - Reference pattern for form/template/portal
-
-### Quick Searches
+**Initialize for current project:**
+```bash
+# From project root
+work on pwd
 ```
-- "mw-crud" or "CRUD" - API skill usage and troubleshooting
-- "OATHAuth" - Authentication fix procedures
-- "sequence" - PostgreSQL sequence sync fix
-- "breadcrumb" - Semantic Breadcrumb Links setup
-- "dark blue" - FCP Section specifications
-- "page forms" - MediaWiki extension guides
-- "business details" - Schema specifications
-- "staff training" - Training system docs
+
+**Search for documents:**
+```bash
+# General search
+search_documents('query')
+
+# By timestamp
+search_by_timestamp(start_date='2026-02-01', limit=10)
+
+# By importance
+search_by_importance(min_importance=8, limit=10)
 ```
+
+**Common Search Topics:**
+- `"mw-crud"` - API skill usage and troubleshooting
+- `"OATHAuth"` - Authentication fix procedures
+- `"sequence"` - PostgreSQL sequence sync fix
+- `"breadcrumb"` - Navigation implementation details
+- `"migration"` - Page migration procedures
+- `"access control"` - Namespace security configuration
+- `"page forms"` - Form/template pattern documentation
+
+**Save new information:**
+```bash
+save_document(title="...", content="...", importance=8, tags="...")
+save_plan(title="...", content="...", priority="high")
+save_decision(title="...", content="...", impact="high")
+```
+
+**Retrieve specific documents by UUID:**
+See troubleshooting sections below for relevant UUIDs
 
 ---
 
@@ -815,6 +687,44 @@ EOF
 2. Verify key permissions: `chmod 600 ~/.ssh/id_rsa`
 3. Check network connectivity: `ping 192.168.2.10`
 4. Verify jail is running on host system
+
+### Unexpected Reboot Recovery (Added 2026-02-23)
+
+**Symptom:** MediaWiki returns HTTP 503 with "Semantic MediaWiki - Maintenance" message after unexpected reboot.
+
+**Cause:** SMW maintenance scripts (setupStore.php, rebuildData.php) interrupted by reboot, leaving SMW in maintenance mode.
+
+**Recovery Steps:**
+
+1. Verify services are running:
+```bash
+ssh 192.168.2.10 'uptime && sudo service apache24 status'
+ssh 192.168.2.30 'sudo service postgresql status'
+```
+
+2. Check for maintenance mode:
+```bash
+curl -s "http://192.168.2.10/mediawiki/index.php/Main_Page" | grep -i "maintenance"
+```
+
+3. Complete SMW setup to clear maintenance lock:
+```bash
+ssh 192.168.2.10 'cd /usr/local/www/mediawiki/extensions/SemanticMediaWiki && \
+  sudo -u www php maintenance/setupStore.php --skip-optimize'
+```
+
+4. Verify MediaWiki is accessible:
+```bash
+curl -s -o /dev/null -w "%{http_code}" "http://192.168.2.10/mediawiki/index.php/Main_Page"
+```
+Expected: `200` or `302` (redirect to login)
+
+5. If still having issues, restart Apache:
+```bash
+ssh 192.168.2.10 'sudo service apache24 restart'
+```
+
+**Memory Bank:** UUID `4d7f0430-715f-4d9e-a53a-59736f5f7e0d` (Recovery Procedure, 9/10 importance)
 
 ---
 
