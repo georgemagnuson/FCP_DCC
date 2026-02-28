@@ -534,6 +534,85 @@ $GLOBALS['egSBLPropertySearchPatternByNamespace'] = [
 
 **For Details:** See Memory Bank for "Standardized PageForms Pattern" documentation
 
+---
+
+## FCP Section Implementation Pattern
+
+**Purpose:** Standard workflow pattern for creating new FCP sections (Risk Management, Taking Responsibility, etc.)
+
+**Pattern:** Hub → Business → Form workflow with auto-listing
+
+### Workflow Structure
+
+```
+FCP Main Page
+    ↓
+Section Hub Page (FCP/Setting_Up/{section})
+    ↓
+Business Section Page (Business:Name/{Section})
+    ↓
+Data Entry Form (Form:{Section})
+```
+
+### Standard Components (7 per section)
+
+1. **Semantic Properties** (2)
+   - `Property:Has_{section}_count` (Number)
+   - `Property:Has_{section}` (Boolean)
+
+2. **Templates** (2)
+   - `Template:{Section}Link` - DPL-compatible business links
+   - `Template:{Section}` - Display template with card styling
+
+3. **Form** (1)
+   - `Form:{Section}` - Data entry form
+
+4. **Pages** (2)
+   - `FCP/Setting_Up/{section}` - Hub page with DPL auto-listing
+   - `Business:Name/{Section}` - Business-specific section page
+
+### Critical Technical Requirements
+
+**Use DPL, not SMW queries:**
+```wiki
+<DPL>
+category=Business Details
+titleregexp=Business:.*/Details$
+mode=userformat
+listseparators=,\n* {{SectionLink|%PAGE%}},\n
+</DPL>
+```
+
+**Add default form directive to business pages:**
+```wiki
+{{#default_form:FormName}}
+{{TemplateName}}
+```
+
+**Link template pattern:**
+```wiki
+{{#replace:{{{1|}}}|/Details|/{SectionName}}}
+```
+
+### Proven Implementations
+
+- **Business Layout:** Image uploads (floor plans, maps)
+- **Risk Management:** Repeatable text groups (5 hazard groups)
+
+### Complete Pattern Documentation
+
+**Memory Bank UUID:** `2fd915df-f7e8-4258-ac42-f001f2bbd583`
+
+This document contains:
+- Complete implementation checklist
+- Code templates for all components
+- Common patterns by data type (images, text groups, documents)
+- Troubleshooting guide
+- Success criteria
+
+**Use this pattern for all future FCP sections** to maintain consistency and reduce development time.
+
+---
 
 ## MediaWiki Extensions
 
