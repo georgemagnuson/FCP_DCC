@@ -76,6 +76,13 @@ Document any important configuration:
 - Configuration file formats and locations
 - Development vs. production settings
 
+## File Access Permissions
+
+This project requires access to temporary files for Memory Bank document extraction and data processing:
+- Allow reading from /tmp/
+- Allow writing to /tmp/
+- Memory Bank extracts documents to /tmp/ for analysis
+
 ## Common Development Tasks
 
 Add task-specific instructions here as the project develops, such as:

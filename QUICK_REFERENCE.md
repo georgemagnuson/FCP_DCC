@@ -35,13 +35,12 @@ ssh 192.168.2.20
 ssh 192.168.2.30
 ```
 
-**Status:** ✅ All servers accessible (tested 2026-02-07)
 **User:** `georgemagnuson`
 **Port:** 22 (standard)
 **SSH Key:** Configured in `~/.ssh/config` for key-based authentication
-**PostgreSQL Access:** Verified using .pgpass (no passwords in commands)
+**PostgreSQL Access:** Uses .pgpass (no passwords in commands)
 
-### Quick SSH Commands (Password-Excluded - Updated 2026-02-02)
+### Quick SSH Commands
 
 **Simplified SSH Access (No flags needed):**
 
@@ -59,7 +58,9 @@ ssh 192.168.2.30
 psql -U postgres -d mediawiki
 ```
 
-**SSH Configuration:** `~/.ssh/config` has been updated with key-based authentication for all three jails. No SSH flags needed.
+**SSH Configuration:** `~/.ssh/config` configured with key-based authentication for all three jails.
+
+**For configuration history:** See Memory Bank UUID `c35de2f1-d215-4c33-a9bc-90197c08ee84`
 
 ---
 
@@ -87,7 +88,8 @@ psql -U postgres -d mediawiki
 psql -h 192.168.2.30 -U postgres -d mediawiki
 ```
 
-**Status:** ✅ `.pgpass` configured at `~/.pgpass`
+**Configuration:**
+- **File Location:** `~/.pgpass`
 - **Credentials:** 192.168.2.30:5432:mediawiki:postgres:[PASSWORD]
 - **Permissions:** 600 (secure)
 - **Benefits:** No password in command history, secure for automated scripts/cron jobs
@@ -103,7 +105,8 @@ ssh 192.168.2.30
 psql -U postgres -d mediawiki
 ```
 
-**Status:** ✅ `.pgpass` configured at `/var/db/postgres/.pgpass` (2026-01-31)
+**Configuration:**
+- **File Location:** `/var/db/postgres/.pgpass`
 - **Credentials:** 192.168.2.30:5432:mediawiki:postgres:[PASSWORD]
 - **Permissions:** 600 (secure, only postgres user can read)
 
@@ -242,8 +245,7 @@ psql -h 192.168.2.30 -U postgres -d mediawiki < /tmp/backup_mediawiki_*.sql
 
 ### Recommended: mw-crud API Skill ✅
 
-**Status:** Fully working (2026-02-19)
-**Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86` — SOLVED: MediaWiki API / mw-crud Fully Working
+**Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86` — MediaWiki API / mw-crud Fully Working
 **Credentials:** See `.env` file (`MEDIAWIKI_USERNAME` and `MEDIAWIKI_PASSWORD`)
 
 ```bash
@@ -290,7 +292,7 @@ source .env
 
 ### Direct SQL Database ⚠️ AVOID FOR PAGE CONTENT
 
-**Status:** Use ONLY for schema/infrastructure queries — NOT for creating or editing pages.
+**Use Case:** Use ONLY for schema/infrastructure queries — NOT for creating or editing pages.
 
 **Why not:** Direct SQL inserts bypass PostgreSQL sequences, causing `duplicate key` revision errors when MediaWiki next tries to write. Always run the sequence fix after any direct SQL page inserts:
 
@@ -454,12 +456,11 @@ source .env
 ```
 
 ---
----
 
 ## Breadcrumb Navigation
 
-**Extension:** Semantic Breadcrumb Links 2.1.0-alpha  
-**Method:** Subpage notation (slash-based hierarchy)  
+**Extension:** Semantic Breadcrumb Links 2.1.0-alpha
+**Method:** Subpage notation (slash-based hierarchy)
 **Rendering:** Breadcrumb trail appears in `mw-indicators` area above page title
 
 **How to Use:**
@@ -475,7 +476,7 @@ Form/Daily_Pest_Inspection → Shows: Form / Daily Pest Inspection
 Training/Safety_Basics → Shows: Training / Safety Basics
 ```
 
-**Configuration:**  
+**Configuration:**
 Located in `/usr/local/www/mediawiki/LocalSettings.php`:
 ```php
 wfLoadExtension( 'SemanticBreadcrumbLinks' );
@@ -536,37 +537,265 @@ $GLOBALS['egSBLPropertySearchPatternByNamespace'] = [
 
 ## MediaWiki Extensions
 
+### DynamicPageList4 (DPL4) - v4.0.0
+- **Purpose:** Dynamic page listing and automatic content generation
+- **Version:** 4.0.0
+- **Location:** `/usr/local/www/mediawiki/extensions/DynamicPageList3` (directory name for compatibility)
+- **Documentation:** https://www.mediawiki.org/wiki/Extension:DynamicPageList4
+- **Memory Bank:** UUID `eb5e70f5-a498-4ba1-9a13-7f7426f16f62`
+
+**Common Usage Examples:**
+
+```wiki
+# Simple list from category
+<DPL>
+category=Business Details
+</DPL>
+
+# Custom formatted list
+<DPL>
+category=Business Details
+mode=userformat
+listseparators=,\n* [[%PAGE%|%TITLE%]],\n
+ordermethod=title
+order=ascending
+</DPL>
+
+# Table with links to related pages
+<DPL>
+category=Business Details
+mode=userformat
+listseparators=,{| class="wikitable"\n|-\n! Business,\n|-\n| [[Business_Layout/%PAGE%|%TITLE%]],\n|}\n
+</DPL>
+
+# With status indicators
+<DPL>
+category=Business Details
+mode=userformat
+listseparators=,* [[%PAGE%|%TITLE%]] {{#ifexist:%PAGE%|✅|⚠️}},\n
+</DPL>
+```
+
+**Clean Display Names Pattern:**
+
+DPL's `%TITLE%` variable shows full namespace+suffix (e.g., "Business:The Jitsu/Details") instead of clean names. The solution uses utility templates with ParserFunctions string manipulation.
+
+**Prerequisites:**
+1. ParserFunctions string functions enabled in LocalSettings.php:
+   ```php
+   $wgPFEnableStringFunctions = true;
+   ```
+
+2. Utility templates created:
+   - `Template:CleanBusinessName` - Strips namespace and suffix
+   - `Template:BusinessLink` - Creates links with clean text
+
+**Working Pattern - Hub Page with Clean Names:**
+```wiki
+<DPL>
+category=Business Details
+mode=userformat
+listseparators=,{| class="wikitable sortable"
+! Business !! Details !! Layout !! Status
+|-
+| {{BusinessLink|%PAGE%}} || [[%PAGE%|📄 Details]] || [[Business_Layout/%PAGE%|🏢 Layout]] || {{#ifexist:Business_Layout/%PAGE%|✅ Complete|⚠️ Pending}}
+,
+,
+|}
+</DPL>
+```
+
+**Result:**
+- Clean business names: "The Jitsu" (not "Business:The Jitsu/Details")
+- Working links to details and layout pages
+- Status indicators for page existence
+- Sortable table with emoji icons
+
+**Template Usage:**
+```wiki
+# Just the clean name (no link)
+{{CleanBusinessName|Business:The Jitsu/Details}}
+Result: The Jitsu
+
+# Link with clean name as text
+{{BusinessLink|Business:The Jitsu/Details}}
+Result: [[Business:The Jitsu/Details|The Jitsu]]
+```
+
+**Key Points:**
+- Pass `%PAGE%` to templates: `{{BusinessLink|%PAGE%}}`
+- Templates are evaluated after DPL processes
+- ParserFunctions work inside templates: `{{#replace:...}}`
+- Can be used in any DPL output format (lists, tables, inline)
+
+**For full solution details:** Memory Bank UUID `4100e681-3c62-4cfc-ae34-f2f85cbac2c8`
+
 ### Page Forms 6.0.4
 - **Purpose:** Form-based data entry interface
 - **Usage:** Business details forms, structured data input
 - **Documentation:** https://www.mediawiki.org/wiki/Extension:Page_Forms
 
+**Form Pattern:**
+```wiki
+{{{for template|TemplateName|label=Display Name}}}
+{{{field|fieldname|input type=text|mandatory}}}
+{{{field|fieldname2|input type=uploadable|image}}}
+{{{end template}}}
+```
+
 ### Semantic MediaWiki (SMW) 6.0.1
 - **Purpose:** Semantic structure and queryable properties
 - **Usage:** Store form data with semantic annotations
-- **Query Syntax:** `{{#ask: [[Category:Business Details]] |?SMW_legal_name |?SMW_activity }}`
 - **Documentation:** https://www.semantic-mediawiki.org/
 
+**Query Examples:**
+```wiki
+# Simple category query
+{{#ask: [[Category:Business Details]]
+ |?SMW_legal_name
+ |?SMW_activity
+}}
+
+# Filtered by date
+{{#ask: [[Has_submission_date::>{{#time:Y-m-d|now -7 days}}]]
+ |?Has_staff_name
+ |format=table
+}}
+
+# Count results
+{{#ask: [[Category:Business Details]]
+ |format=count
+}}
+```
+
+### Semantic Breadcrumb Links 2.1.0-alpha
+- **Purpose:** Hierarchical breadcrumb navigation using subpage notation
+- **Usage:** Automatic breadcrumb trails for pages with slash notation
+- **Configuration:** LocalSettings.php (lines for namespace configuration)
+
+**How It Works:**
+- Page name: `FCP/Setting_Up/Business_details`
+- Breadcrumbs display: `FCP / Setting_Up / Business_details`
+- Parent pages must exist for clickable links
+- Current page displays as plain text
+
+**Example Page Names:**
+```
+FCP/Closing/Cleaning_up
+Form/Daily_Pest_Inspection
+Training/Safety_Basics
+```
+
 ### ParserFunctions
-- **Purpose:** Conditional logic in templates
-- **Usage:** `{{#if:}}`, `{{#ifeq:}}`, `{{#switch:}}`
-- **Configuration:** Enabled in LocalSettings.php
+- **Purpose:** Conditional logic and string manipulation in templates
+- **Configuration:** Enabled in LocalSettings.php (line 180)
+- **String Functions:** Enable with `$wgPFEnableStringFunctions = true;` in LocalSettings.php
 - **Documentation:** https://www.mediawiki.org/wiki/Extension:ParserFunctions
 
-### SubpageNavigation
-- **Purpose:** Automatic page navigation for subpages
-- **Usage:** Hierarchical page organization with breadcrumb navigation
-- **Status:** Enabled and active
+**Common Usage:**
+```wiki
+# Conditional display
+{{#if:{{{parameter|}}}|Show if exists|Show if empty}}
 
-### Echo
-- **Purpose:** User notifications system
-- **Usage:** Alerts for page changes, user interactions
-- **Status:** Enabled and active
+# String comparison
+{{#ifeq:{{{value}}}|expected|Match|No match}}
+
+# Switch statement
+{{#switch:{{{type}}}
+ |option1=Result 1
+ |option2=Result 2
+ |#default=Default result
+}}
+
+# Page existence check
+{{#ifexist:PageName|Page exists|Page missing}}
+
+# String replacement (requires $wgPFEnableStringFunctions = true)
+{{#replace:Business:The Jitsu|Business:|}}
+
+# Nested string manipulation
+{{#replace:{{#replace:Business:The Jitsu/Details|Business:|}}|/Details|}}
+Result: The Jitsu
+```
+
+**Important:** String manipulation functions (`#replace`, `#explode`, `#sub`, `#pos`) require `$wgPFEnableStringFunctions = true` in LocalSettings.php. Without this setting, these functions display as raw code instead of being evaluated.
 
 ### CategoryTree
 - **Purpose:** Display category contents as expandable tree
 - **Usage:** Interactive category browsing and navigation
-- **Status:** Enabled and active
+
+**Usage:**
+```wiki
+# Basic category tree
+<categorytree>Category Name</categorytree>
+
+# Pages mode (shows pages in category)
+<categorytree mode=pages>Business Details</categorytree>
+
+# Hide root category
+{{#categorytree:Business Details|mode=pages|hideroot}}
+```
+
+### SubpageNavigation
+- **Purpose:** Automatic page navigation for subpages
+- **Usage:** Hierarchical page organization
+
+### Echo
+- **Purpose:** User notifications system
+- **Usage:** Alerts for page changes, user interactions
+
+### MsUpload
+- **Purpose:** Drag-and-drop file upload directly in edit pages
+- **Installation:** `/usr/local/www/mediawiki/extensions/MsUpload`
+- **Documentation:** https://www.mediawiki.org/wiki/Extension:MsUpload
+- **Memory Bank:** UUID `f768188d-f6f9-4385-b84b-3d5776cdfdea` (Photo upload troubleshooting)
+
+**Features:**
+- Drag-and-drop multiple files while editing
+- Upload button in edit toolbar
+- Rename files before upload
+- Insert as link, gallery, or embedded image
+- Works in any edit box (pages, templates, forms)
+
+**How to Use:**
+1. Click "Edit" or "Edit source" on any page
+2. Drag and drop images onto the edit area, OR click the upload button in toolbar
+3. Choose insertion format:
+   - **Link** - Just a link to the file: `[[:File:Name.png]]`
+   - **Gallery** - Thumbnail in gallery: `File:Name.png` (for use in `<gallery>` tags)
+   - **Image** - Full embedded image: `[[File:Name.png|thumb]]`
+4. File uploads instantly and filename is inserted at cursor position
+5. Save the page
+
+**Best Practice for Photo Galleries:**
+
+Use MsUpload with **direct gallery tags** (not templates):
+
+```wiki
+<gallery mode="traditional" widths="400px" heights="300px">
+[drag-drop files here, select "Gallery" mode]
+</gallery>
+```
+
+**⚠️ Important Limitation:**
+
+MsUpload works perfectly for uploading and inserting filenames, but **MediaWiki gallery tags inside templates cannot render template parameters**. This is a MediaWiki parser limitation (galleries parse before template expansion).
+
+**Solutions:**
+- ✅ **Recommended:** Use direct galleries in page source (not templates) + MsUpload for drag-drop
+- ❌ **Doesn't work:** Template with gallery tag trying to display `{{{parameter}}}`
+
+See Memory Bank UUID `f768188d-f6f9-4385-b84b-3d5776cdfdea` for complete root cause analysis.
+
+**Installation (if needed on another server):**
+```bash
+cd /usr/local/www/mediawiki/extensions
+sudo git clone https://gerrit.wikimedia.org/r/mediawiki/extensions/MsUpload
+sudo chown -R www:www MsUpload
+echo 'wfLoadExtension( "MsUpload" );' | sudo tee -a /usr/local/www/mediawiki/LocalSettings.php
+sudo -u www php maintenance/update.php --quick
+sudo service apache24 restart
+```
 
 ---
 
@@ -634,6 +863,31 @@ See troubleshooting sections below for relevant UUIDs
 
 ## Troubleshooting
 
+### General Debugging Approach
+
+**When something isn't working as expected:**
+
+1. **Create test pages** with different approaches to isolate the problem
+   - Example: If a template isn't rendering, create a simple test page with minimal syntax
+   - Test variations: with/without parameters, different syntax formats, direct vs. templated
+
+2. **Check official documentation**
+   - MediaWiki: https://www.mediawiki.org/wiki/
+   - PageForms: https://www.mediawiki.org/wiki/Extension:Page_Forms
+   - Semantic MediaWiki: https://www.semantic-mediawiki.org/
+   - Search for error messages and specific extension behavior
+
+3. **Compare working vs. non-working examples**
+   - If something works in one place but not another, compare the exact syntax
+   - Check for whitespace, special characters, or formatting differences
+
+4. **Use the MediaWiki debug tools**
+   - Check parser cache timestamps in HTML source (look for `Cached time:`)
+   - Use `?action=purge` URL parameter to force cache refresh
+   - Review page info (`?action=info`) for debugging details
+
+**Remember:** Don't hesitate to create test pages and consult documentation before attempting complex fixes. Systematic testing saves time.
+
 ### mw-crud API Authentication Fails — OATHAuth Error
 **Symptom:** `internal_api_error_DBQueryError: relation "oathauth_devices" does not exist`
 **Memory Bank:** `bfcb00aa-03eb-46b3-8710-8b9417b15c86`
@@ -688,7 +942,7 @@ EOF
 3. Check network connectivity: `ping 192.168.2.10`
 4. Verify jail is running on host system
 
-### Unexpected Reboot Recovery (Added 2026-02-23)
+### Unexpected Reboot Recovery
 
 **Symptom:** MediaWiki returns HTTP 503 with "Semantic MediaWiki - Maintenance" message after unexpected reboot.
 
@@ -724,24 +978,22 @@ Expected: `200` or `302` (redirect to login)
 ssh 192.168.2.10 'sudo service apache24 restart'
 ```
 
-**Memory Bank:** UUID `4d7f0430-715f-4d9e-a53a-59736f5f7e0d` (Recovery Procedure, 9/10 importance)
+**Memory Bank:** UUID `a6285c2c-a41f-4bb8-bb50-512b57d73d5c` (Recovery Procedure)
 
 ---
 
 ## MediaWiki Access Control Configuration
 
-### Overview (Implemented 2026-02-19)
+### Overview
 
 **Purpose:** Protect sensitive FCP compliance documentation (employee records, temperature logs, incident reports) while providing a professional branded entry point for authorized users.
-
-**Status:** ✅ ACTIVE
 
 **Configuration:**
 - Anonymous users redirected to `Jitsu_Home` landing page
 - All content except landing page requires authentication
 - Existing `Main_Page` preserved as comprehensive portal for authenticated users
 
-### Jitsu_Home Landing Page (Page ID: 10013)
+### Jitsu_Home Landing Page
 
 **Features:**
 - Minimal design with centered Jitsu logo (192×192px)
@@ -805,7 +1057,7 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 
 **Test authenticated access (requires login):**
 1. Login at: http://192.168.2.10/mediawiki/Special:UserLogin
-2. Use credentials: Username = `Georgemagnuson`, Password = (see `.env` file: `MEDIAWIKI_PASSWORD`)
+2. Use credentials from `.env` file (`MEDIAWIKI_USERNAME` and `MEDIAWIKI_PASSWORD`)
 3. Navigate to Main_Page — should be fully accessible
 
 **Test logout redirect:**
@@ -829,11 +1081,8 @@ sudo cp /usr/local/www/mediawiki/LocalSettings.php.backup-YYYYMMDD-HHMMSS \
 # 3. Restart Apache
 sudo service apache24 restart
 
-# 4. (Optional) Delete landing page if not needed
-export MEDIAWIKI_API_URL="http://192.168.2.10/mediawiki/api.php"
-export MEDIAWIKI_USERNAME="Georgemagnuson"
-export MEDIAWIKI_PASSWORD="[from .env: MEDIAWIKI_PASSWORD]"
-
+# 4. (Optional) Delete landing page if not needed (use .env credentials)
+source .env
 ~/.claude/skills/mediawiki-crud/mw-crud delete "Jitsu_Home" \
   --reason "Rollback" \
   --url "$MEDIAWIKI_API_URL" \
@@ -841,18 +1090,17 @@ export MEDIAWIKI_PASSWORD="[from .env: MEDIAWIKI_PASSWORD]"
   --password "$MEDIAWIKI_PASSWORD"
 ```
 
+**For implementation details:** See Memory Bank UUID `299a98b3-ca64-437d-98ac-1b3cf1017b1c`
+
 ---
 
 ## Namespace-Based Security Architecture
 
-### Overview (Implemented 2026-02-20)
+### Overview
 
 **Purpose:** Segregate data by confidentiality level using custom MediaWiki namespaces with role-based access controls.
 
-**Status:** ✅ FULLY OPERATIONAL (Phases 1-6 Complete, Tested)
-
-**Implementation Date:** 2026-02-20
-**Memory Bank:** `e06440d3-f035-4d91-bb27-7e3b0b3a1f6c` (Importance: 10/10)
+**Memory Bank:** `d245f9b5-2be0-4ce1-b8c7-9ca6261fed21` (Full implementation details)
 
 ### Custom Namespaces
 
@@ -923,14 +1171,10 @@ Example: JITSU_REPORTS:Employee_Training_Status
 
 ### Access Control Testing
 
-**Test Accounts (Password: TestPassword123):**
-- Carlos Chef (data_recorder) - Employee access
-- Sarah Manager (data_editor) - Manager access
-- Tom Waiter (data_recorder) - Employee access
-- Test Inspector (inspector) - Read-only inspector access
-- Georgemagnuson (sysop) - Full admin access
+**Test Accounts:**
+See `.env` file for test account credentials (never commit passwords to repository)
 
-**Test Results (2026-02-20):**
+**Expected Behavior:**
 - ✅ Employees blocked from HR records (JITSU_EMPLOYEES)
 - ✅ Employees blocked from confidential data (JITSU_CONFIDENTIAL)
 - ✅ Employees can read/edit collaborative data (JITSU_DATA)
@@ -949,28 +1193,33 @@ Example: JITSU_REPORTS:Employee_Training_Status
 - End of file: Namespace protection settings
 
 **Backup Files:**
-- `/usr/local/www/mediawiki/LocalSettings.php.backup-20260220-202505` (pre-implementation)
+- `/usr/local/www/mediawiki/LocalSettings.php.backup-YYYYMMDD-HHMMSS` (timestamped backups)
 - `/usr/local/www/mediawiki/LocalSettings.php.backup-before-namespaces`
-- Multiple timestamped backups available
 
 ### Common Operations
 
 **Create a training record:**
 ```bash
+# Use .env credentials
+source .env
+
 ~/.claude/skills/mediawiki-crud/mw-crud create \
   "JITSU_EMPLOYEES_TRAINING:Carlos_Chef/Food_Safety" \
   --content "Training completion record" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 ```
 
 **Create an employee record:**
 ```bash
+# Use .env credentials
+source .env
+
 ~/.claude/skills/mediawiki-crud/mw-crud create \
   "JITSU_EMPLOYEES:New_Employee" \
   --content "{{Employee|employee_name=New Employee|position=Cook}}" \
   --url "http://192.168.2.10/mediawiki/api.php" \
-  --username "Georgemagnuson" --password "TestPassword123"
+  --username "$MEDIAWIKI_USERNAME" --password "$MEDIAWIKI_PASSWORD"
 ```
 
 **Query user groups:**
@@ -1024,7 +1273,7 @@ Confidential business information here.
 - Color scheme supports accessibility standards
 - OpenVPN tunnel connects JITSU to ASTEROID M for DB access
 - All jails configured with persistent storage and auto-start on reboot
-- **PostgreSQL `.pgpass` configured** (2026-01-31): `/var/db/postgres/.pgpass` on postgresqljail enables password-less psql connections and secure automated scripts/cron jobs
+- **PostgreSQL `.pgpass` configured:** `/var/db/postgres/.pgpass` on postgresqljail enables password-less psql connections and secure automated scripts/cron jobs
 
 ---
 
@@ -1033,4 +1282,4 @@ Confidential business information here.
 **Project Owner:** George Magnuson
 **Local Dev Path:** `/Users/georgemagnuson/Documents/GitHub/FCP_DCC/`
 **Documentation:** CLAUDE.md in project root
-**Memory Bank:** 102 documents covering architecture, guides, specifications, and implementation status
+**Memory Bank:** Comprehensive documentation covering architecture, guides, specifications, and implementation details
