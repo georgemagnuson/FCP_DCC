@@ -290,6 +290,23 @@ source .env
 - Handles CSRF tokens and conflict detection
 - No risk of revision sequence errors
 
+### mw-crud vs Direct SQL: Policy
+
+**ALWAYS use mw-crud for page and template operations.**
+
+Use psql **ONLY** if mw-crud fails AND:
+1. You clearly explain the specific failure to the user
+2. You describe why mw-crud won't work
+3. The user explicitly approves using psql as a workaround
+
+**Never silently switch to psql** when mw-crud gets complicated or output formatting is messy. Always ask first.
+
+**Why this matters:**
+- mw-crud maintains proper MediaWiki integrity (audit trails, caches, sequences, SMW)
+- Direct SQL can cause orphaned records, broken sequences, and cache invalidation issues
+- It keeps the workflow consistent and auditable
+- It prevents hidden bugs from improper database manipulation
+
 ### Direct SQL Database ⚠️ AVOID FOR PAGE CONTENT
 
 **Use Case:** Use ONLY for schema/infrastructure queries — NOT for creating or editing pages.
