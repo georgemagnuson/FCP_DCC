@@ -1,0 +1,53 @@
+{
+	"name": "FcpBridge",
+	"version": "0.1.0",
+	"author": "Jitsu FCP Project",
+	"descriptionmsg": "fcpbridge-desc",
+	"url": "",
+	"license-name": "MIT",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.43.0"
+	},
+	"AutoloadClasses": {
+		"FcpApiClient":              "includes/FcpApiClient.php",
+		"SpecialFcpSubmit":          "includes/SpecialFcpSubmit.php",
+		"SpecialFcpFile":            "includes/SpecialFcpFile.php",
+		"FcpParserFunctions":        "includes/FcpParserFunctions.php",
+		"FcpHooks":                  "includes/FcpHooks.php",
+		"SpecialFcpEmployee":        "includes/SpecialFcpEmployee.php",
+		"SpecialFcpEmployeeTraining": "includes/SpecialFcpEmployeeTraining.php",
+		"SpecialFcpNewEmployee":     "includes/SpecialFcpNewEmployee.php",
+		"SpecialFcpTrainingAction":  "includes/SpecialFcpTrainingAction.php",
+		"SpecialFcpCoolingRecord":   "includes/SpecialFcpCoolingRecord.php"
+	},
+	"SpecialPages": {
+		"FcpSubmit":             "SpecialFcpSubmit",
+		"FcpFile":               "SpecialFcpFile",
+		"FcpEmployee":           "SpecialFcpEmployee",
+		"FcpEmployeeTraining":   "SpecialFcpEmployeeTraining",
+		"FcpNewEmployee":        "SpecialFcpNewEmployee",
+		"FcpTrainingAction":     "SpecialFcpTrainingAction",
+		"FcpCoolingRecord":      "SpecialFcpCoolingRecord"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "FcpParserFunctions::onParserFirstCallInit"
+	},
+	"ExtensionMessagesFiles": {
+		"FcpBridgeMagic": "FcpBridge.magic.php"
+	},
+	"config": {
+		"FcpApiUrl": {
+			"value": "http://127.0.0.1:8765",
+			"description": "Base URL of the FCP CRUD API (localhost only)"
+		},
+		"FcpApiSecret": {
+			"value": "",
+			"description": "Shared secret matching FCP_SHARED_SECRET in fcp_api/.env"
+		}
+	},
+	"MessagesDirs": {
+		"FcpBridge": ["i18n"]
+	},
+	"manifest_version": 2
+}

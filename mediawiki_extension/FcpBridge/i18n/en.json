@@ -1,0 +1,10 @@
+{
+	"@metadata": { "authors": ["Jitsu FCP Project"] },
+	"fcpbridge-desc":             "Bridges MediaWiki Page Forms with the FCP CRUD API for Food Control Plan records.",
+	"special-fcpsubmit":          "FCP Submit",
+	"fcpbridge-post-only":        "This page only accepts form submissions.",
+	"fcpbridge-login-required":   "You must be logged in to submit FCP records.",
+	"fcpbridge-csrf-error":       "Invalid form token. Please reload the page and try again.",
+	"fcpbridge-success":          "Record saved successfully.",
+	"fcpbridge-error":            "Error saving record: $1"
+}
