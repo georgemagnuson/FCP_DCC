@@ -19,7 +19,8 @@
 		"SpecialFcpEmployeeTraining": "includes/SpecialFcpEmployeeTraining.php",
 		"SpecialFcpNewEmployee":     "includes/SpecialFcpNewEmployee.php",
 		"SpecialFcpTrainingAction":  "includes/SpecialFcpTrainingAction.php",
-		"SpecialFcpCoolingRecord":   "includes/SpecialFcpCoolingRecord.php"
+		"SpecialFcpCoolingRecord":   "includes/SpecialFcpCoolingRecord.php",
+		"SpecialFcpEquipment":       "includes/SpecialFcpEquipment.php"
 	},
 	"SpecialPages": {
 		"FcpSubmit":             "SpecialFcpSubmit",
@@ -28,7 +29,8 @@
 		"FcpEmployeeTraining":   "SpecialFcpEmployeeTraining",
 		"FcpNewEmployee":        "SpecialFcpNewEmployee",
 		"FcpTrainingAction":     "SpecialFcpTrainingAction",
-		"FcpCoolingRecord":      "SpecialFcpCoolingRecord"
+		"FcpCoolingRecord":      "SpecialFcpCoolingRecord",
+		"FcpEquipment":          "SpecialFcpEquipment"
 	},
 	"Hooks": {
 		"ParserFirstCallInit": "FcpParserFunctions::onParserFirstCallInit"

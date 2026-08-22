@@ -85,13 +85,15 @@ def add_corrective_action(
         cur.execute("""
             INSERT INTO corrective_action
                 (incident_report_id, action_taken, actioned_by,
-                 actioned_at, outcome, follow_up_required, follow_up_notes)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                 actioned_at, outcome, follow_up_required, follow_up_notes,
+                 parent_action_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING *
         """, (
             incident_id, body.action_taken, emp_id,
             body.actioned_at or datetime.now(),
-            body.outcome, body.follow_up_required, body.follow_up_notes
+            body.outcome, body.follow_up_required, body.follow_up_notes,
+            str(body.parent_action_id) if body.parent_action_id else None,
         ))
         return dict(cur.fetchone())
 
@@ -127,11 +129,11 @@ def get_open_incidents(
     location_id: Optional[str] = Query(None),
     caller: dict = Depends(auth.verify_request),
 ):
-    """All open incidents (no closed corrective action). Manager and above."""
+    """All open incidents with their corrective actions. Manager and above."""
     auth.require_level(MANAGER_LEVEL)(caller)
     with database.get_cursor() as cur:
         base = """
-            SELECT ir.* FROM incident_report ir
+            SELECT ir.id FROM incident_report ir
             WHERE NOT EXISTS (
                 SELECT 1 FROM corrective_action ca
                 WHERE ca.incident_report_id = ir.id
@@ -143,7 +145,8 @@ def get_open_incidents(
                         (location_id,))
         else:
             cur.execute(base + " ORDER BY ir.reported_at DESC")
-        return [dict(r) for r in cur.fetchall()]
+        ids = [str(r["id"]) for r in cur.fetchall()]
+        return [_fetch_incident(id_, cur) for id_ in ids]
 
 
 @router.get("/{incident_id}", response_model=IncidentReportOut)

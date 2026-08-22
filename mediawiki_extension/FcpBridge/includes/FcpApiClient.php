@@ -94,6 +94,63 @@ class FcpApiClient {
 	}
 
 	/**
+	 * PUT data to an API endpoint.
+	 * Returns decoded response array or throws on error.
+	 */
+	public function put( string $endpoint, array $data, \MediaWiki\User\User $user ): array {
+		$url = rtrim( $this->baseUrl, '/' ) . '/' . ltrim( $endpoint, '/' );
+
+		$req = $this->httpFactory()->create( $url, [
+			'method'   => 'PUT',
+			'timeout'  => 10,
+			'postData' => json_encode( $data ),
+		] );
+
+		foreach ( $this->authHeaders( $user ) as $key => $value ) {
+			$req->setHeader( $key, $value );
+		}
+
+		$status = $req->execute();
+
+		if ( !$status->isOK() ) {
+			$body    = $req->getContent();
+			$decoded = json_decode( $body, true );
+			$detail  = $decoded['detail'] ?? $body ?? 'Unknown error';
+			throw new \RuntimeException( "FCP API error ($endpoint): $detail" );
+		}
+
+		return json_decode( $req->getContent(), true ) ?? [];
+	}
+
+	/**
+	 * DELETE an API endpoint.
+	 * Returns decoded response array or throws on error.
+	 */
+	public function delete( string $endpoint, \MediaWiki\User\User $user ): array {
+		$url = rtrim( $this->baseUrl, '/' ) . '/' . ltrim( $endpoint, '/' );
+
+		$req = $this->httpFactory()->create( $url, [
+			'method'  => 'DELETE',
+			'timeout' => 10,
+		] );
+
+		foreach ( $this->authHeaders( $user ) as $key => $value ) {
+			$req->setHeader( $key, $value );
+		}
+
+		$status = $req->execute();
+
+		if ( !$status->isOK() ) {
+			$body    = $req->getContent();
+			$decoded = json_decode( $body, true );
+			$detail  = $decoded['detail'] ?? $body ?? 'Unknown error';
+			throw new \RuntimeException( "FCP API error ($endpoint): $detail" );
+		}
+
+		return json_decode( $req->getContent(), true ) ?? [];
+	}
+
+	/**
 	 * GET data from an API endpoint.
 	 * Returns decoded response array or throws on error.
 	 */

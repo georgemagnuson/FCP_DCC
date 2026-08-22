@@ -38,6 +38,7 @@ class CorrectiveActionIn(BaseModel):
     outcome:            Optional[str] = None
     follow_up_required: bool = False
     follow_up_notes:    Optional[str] = None
+    parent_action_id:   Optional[UUID] = None
 
     coerce_bools = model_validator(mode="before")(coerce_string_bools)
 
@@ -51,6 +52,7 @@ class CorrectiveActionOut(BaseModel):
     outcome:             Optional[str]
     follow_up_required:  bool
     follow_up_notes:     Optional[str]
+    parent_action_id:    Optional[UUID]
     closed_at:           Optional[datetime]
     closed_by:           Optional[UUID]
     created_at:          datetime

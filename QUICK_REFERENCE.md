@@ -634,6 +634,7 @@ For detailed documentation, see Memory Bank:
 | **MPI FCP Version Check (email fix)** | 55200a4a-6a99-4753-85f9-b59aed96dcc4 | Email delivery fixed via authenticated Gmail SMTP |
 | **MPI S39-00006 Remediation** | 22f6a209-ae3b-4402-9614-523d9ccf01db | First applied fix — doc 16684 confirmed/updated; 6 docs still pending WAF-blocked verification |
 | **MPI S39-00006 Content Diff** | 364a84b9-2898-4ca4-9939-6c2da4c67d89 | Real card content changes (freezing, recontamination) — Cooling_Records fixed; Cooking_Verification/Closing_Check gaps open |
+| **MPI Check — Banner Status + Aug 29 Follow-up** | 5185ae0b-996f-429e-9591-a7d66328de6a | Banner partially cleared; cloud routines can't reach llamajail (LAN-only rule); one-time cron scheduled |
 
 **To access these:**
 ```bash

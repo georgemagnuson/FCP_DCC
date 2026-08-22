@@ -6,6 +6,7 @@ Endpoints:
     POST /diary/closing-check
     GET  /diary/checks/today
     GET  /diary/checks?date=YYYY-MM-DD
+    GET  /diary/dashboard/today
 
     POST /diary/cooking-verification
     GET  /diary/cooking-verifications?date=YYYY-MM-DD
@@ -26,7 +27,7 @@ Permission levels:
     Manager   (3): POST thermometer calibration (also allowed)
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 import database
 import auth
@@ -144,6 +145,79 @@ def checks_for_date(
             ORDER BY check_type
         """, (business_id, target))
         return [dict(r) for r in cur.fetchall()]
+
+
+@router.get("/dashboard/today")
+def dashboard_today(
+    business_id: str = Query(...),
+    location_id: str = Query(...),
+    caller:      dict = Depends(auth.verify_request),
+):
+    """Daily dashboard: opening/closing check status, temperature count, active cooling events."""
+    auth.require_level(EMPLOYEE_LEVEL)(caller)
+    today = date.today()
+    with database.get_cursor() as cur:
+        # Opening and closing checks
+        cur.execute("""
+            SELECT check_type, all_ok, checked_by, created_at
+            FROM daily_check
+            WHERE business_id = %s AND check_date = %s
+        """, (business_id, today))
+        checks_raw = {r["check_type"]: dict(r) for r in cur.fetchall()}
+
+        # Temperature readings today for this location
+        cur.execute("""
+            SELECT COUNT(*) AS cnt
+            FROM temperature_log tl
+            JOIN equipment e ON e.id = tl.equipment_id
+            WHERE e.location_id = %s
+              AND tl.recorded_at::date = %s
+        """, (location_id, today))
+        temp_count = cur.fetchone()["cnt"]
+
+        # Active cooling events for this location
+        cur.execute("""
+            SELECT id, food_description, cooked_at, clock_started_at,
+                   target_stage1_minutes, target_stage2_minutes,
+                   stage1_completed_at, stage2_completed_at
+            FROM food_cooling_event
+            WHERE location_id = %s AND closed_at IS NULL
+            ORDER BY cooked_at DESC
+        """, (location_id,))
+        cooling_rows = cur.fetchall()
+
+    def _check_summary(row):
+        if row is None:
+            return {"done": False, "all_ok": None, "checked_by": None, "time": None}
+        return {
+            "done":       True,
+            "all_ok":     row["all_ok"],
+            "checked_by": row["checked_by"],
+            "time":       row["created_at"].strftime("%H:%M"),
+        }
+
+    cooling_events = []
+    for row in cooling_rows:
+        stage = "stage_2" if row["stage1_completed_at"] else "stage_1"
+        clock_start = row["clock_started_at"] or row["cooked_at"]
+        stage1_dl = clock_start + timedelta(minutes=row["target_stage1_minutes"]) if clock_start else None
+        stage2_dl = clock_start + timedelta(minutes=row["target_stage1_minutes"] + row["target_stage2_minutes"]) if clock_start else None
+        cooling_events.append({
+            "event_id":        str(row["id"]),
+            "food_description": row["food_description"],
+            "cooked_at":       row["cooked_at"].isoformat() if row["cooked_at"] else None,
+            "stage":           stage,
+            "stage1_deadline": stage1_dl.isoformat() if stage1_dl else None,
+            "stage2_deadline": stage2_dl.isoformat() if stage2_dl else None,
+        })
+
+    return {
+        "date":                       today.isoformat(),
+        "opening_check":              _check_summary(checks_raw.get("opening")),
+        "closing_check":              _check_summary(checks_raw.get("closing")),
+        "temperature_readings_today": int(temp_count),
+        "active_cooling_events":      cooling_events,
+    }
 
 
 # =============================================================
