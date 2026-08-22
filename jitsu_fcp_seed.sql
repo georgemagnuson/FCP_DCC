@@ -22,8 +22,8 @@ INSERT INTO business (
     '+6434701155',
     'info@thejitsu.com',
     NULL,                           -- registration number not yet recorded in MW
-    'S39-00005',
-    '2025-08-01'
+    'S39-00006',
+    '2026-08-11'                    -- based on MPI PDF metadata (dmsdocument 16684); no separate regulatory notice date confirmed
 );
 
 

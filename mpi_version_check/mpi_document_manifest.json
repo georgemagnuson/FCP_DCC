@@ -1,0 +1,92 @@
+{
+  "_comment": "Tracks the MPI documents this project's compliance content is built from. `last_known_version`/`last_known_md5` reflect what the REPO currently implements — NOT the live MPI site. Only update these fields as part of a completed remediation (repo code/docs updated to match). check_mpi_versions.py compares this manifest against the live MPI site; it never writes to this file itself.",
+  "documents": [
+    {
+      "id": "16684",
+      "name": "Simply Safe & Suitable Template FCP (colour A5)",
+      "filename": "16684-Simply-safe-and-suitable-food-control-plan-template-colour.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/16684/direct",
+      "version_pattern": "S39-\\d{5}",
+      "last_known_version": "S39-00006",
+      "last_known_md5": "52c5d18aedd890cbd759135b3c80fea1",
+      "used_by": [
+        "jitsu_fcp_schema.sql",
+        "jitsu_fcp_seed.sql",
+        "QUICK_REFERENCE.md",
+        "mediawiki_extension/FcpBridge/includes/SpecialFcpCoolingRecord.php"
+      ]
+    },
+    {
+      "id": "56692",
+      "name": "Simply Safe & Suitable Template FCP (black & white, large font, A4)",
+      "filename": "56692-Template-Food-Control-Plan-Simply-Safe-Suitable-black-and-white-A4.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/56692/direct",
+      "version_pattern": "S39-\\d{5}",
+      "last_known_version": "S39-00005",
+      "last_known_md5": "37516f50922b07b7d56cf45e3cdfdd97",
+      "used_by": [
+        "Companion large-print edition of 16684 — same S39 versioning"
+      ]
+    },
+    {
+      "id": "40115",
+      "name": "Packaging and labelling your food or drink template",
+      "filename": "40115-Packaging-and-labelling-your-food-or-drink-template.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/40115/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "107a4ba8b5095f77c399d17cfd15aa8a",
+      "used_by": []
+    },
+    {
+      "id": "40118",
+      "name": "Sourcing and receiving food and drink template",
+      "filename": "40118-Sourcing-and-receiving-food-and-drink-template.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/40118/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "80a8c11a5f28ee4656da6511f16218d7",
+      "used_by": []
+    },
+    {
+      "id": "71020",
+      "name": "Ensuring your water is suitable",
+      "filename": "71020-Ensuring-your-water-is-suitable.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/71020/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "b5192facb208c346102178c2697e2d99",
+      "used_by": []
+    },
+    {
+      "id": "71021",
+      "name": "Allergens and knowing what's in your food or drink (MFP)",
+      "filename": "71021-20251114-MFP-final-allergens-and-knowing-whats-in-food-KC-V2.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/71021/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "dced0b597e3b0453a0af069830b68500",
+      "used_by": []
+    },
+    {
+      "id": "71036",
+      "name": "Tracing food and drink template",
+      "filename": "71036-Tracing-food-and-drink-template.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/71036/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "c4b9bc3b76ce178bbfb53f63d5b6e736",
+      "used_by": []
+    },
+    {
+      "id": "42664",
+      "name": "Top 5 Food Safety Factors: Food service (poster)",
+      "filename": "42664-Dec24-A4_Top-5-Food-Service-poster.pdf",
+      "url": "https://www.mpi.govt.nz/dmsdocument/42664/direct",
+      "version_pattern": null,
+      "last_known_version": null,
+      "last_known_md5": "0a2a216b73a0c6d630d3f2f9ab205652",
+      "used_by": []
+    }
+  ]
+}

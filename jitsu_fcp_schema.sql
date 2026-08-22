@@ -145,7 +145,7 @@ COMMENT ON COLUMN temperature_log.sensor_id IS 'Future use: identifier of the ph
 -- =============================================================
 -- FOOD COOLING
 -- =============================================================
--- NZ FCP requirement (S39-00005):
+-- NZ FCP requirement (S39-00006):
 --   Clock starts when food reaches 60°C
 --   Stage 1: 60°C → ≤21°C in < 2 hours
 --   Stage 2: 21°C → ≤5°C in < 4 hours
