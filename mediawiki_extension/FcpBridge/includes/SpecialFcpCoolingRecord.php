@@ -2,7 +2,7 @@
 /**
  * Special:FcpCoolingRecord — multi-step food cooling process tracker.
  *
- * Implements NZ FCP cooling requirements (S39-00005):
+ * Implements NZ FCP cooling requirements (S39-00006):
  *   Stage 1: 60°C → ≤21°C within 2 hours
  *   Stage 2: 21°C → ≤5°C within 4 hours
  *
@@ -442,7 +442,7 @@ HTML );
 
 		return <<<HTML
 <table class="wikitable" style="width:auto;margin-bottom:1em;background:#f8f9fa;">
-<tr><th colspan="2" style="background:#e9ecef;color:#000;">Compliance Status (NZ FCP S39-00005)</th></tr>
+<tr><th colspan="2" style="background:#e9ecef;color:#000;">Compliance Status (NZ FCP S39-00006)</th></tr>
 <tr>
   <th style="color:#000;">Stage 1 &mdash; 60°C &rarr; ≤{$s1Target}</th>
   <td>{$s1Badge}</td>
