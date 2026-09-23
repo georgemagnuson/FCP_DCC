@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HACCP Compliance Report — {{ session.session_name }}</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:820px;margin:20px auto;padding:0 15px}
+  h1{color:#333;font-size:20px;margin-bottom:4px}
+  .info{background:#f8f9fa;padding:12px 16px;border-radius:6px;margin:14px 0;font-size:14px}
+  .info p{margin:4px 0}
+  .badge{display:inline-block;padding:3px 10px;border-radius:4px;font-weight:bold;font-size:13px}
+  .pass{background:#d4edda;color:#155724}.fail{background:#f8d7da;color:#721c24}.prog{background:#cce5ff;color:#004085}
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+  th{background:#343a40;color:#fff;padding:8px 10px;text-align:left}
+  td{padding:6px 10px;border-bottom:1px solid #dee2e6}
+  .ck{background:#fff3cd}.p1{background:#fff9e6}.p2{background:#e8f4fd}.gr{background:#ffe5d0}.ps{background:#d4edda}.fl{background:#f8d7da}
+  .dz{color:#a94442;font-weight:bold}
+  .prtbtn{padding:7px 16px;font-size:13px;cursor:pointer;margin-bottom:12px;border:1px solid #ccc;border-radius:4px;background:#fff}
+  .cap{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 6px}
+  .tl-wrap{position:relative}
+  .tl-bar{display:flex;height:20px;border-radius:4px;overflow:hidden;border:1px solid #dee2e6}
+  .tl-seg{height:100%}
+  .tl-ticks{position:relative;height:14px;font-size:10px;color:#888;margin-top:3px}
+  .tl-ticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+  svg.chart{width:100%;height:auto;display:block}
+  @media print{.noprint{display:none}}
+</style>
+</head>
+<body>
+<h1>HACCP Cooling Compliance Report</h1>
+
+<div class="info">
+  <p><strong>Session:</strong> {{ session.session_name }} ({{ session.id }})</p>
+  <p><strong>Device:</strong> {{ session.device_name }} ({{ session.mac_address }})</p>
+  <p><strong>Started:</strong> {{ session.started_at | dt }} &nbsp;|&nbsp;
+     <strong>Ended:</strong> {{ session.ended_at | dt }} &nbsp;|&nbsp;
+     <strong>End reason:</strong> {{ session.end_reason or "--" }}</p>
+
+  <p><strong>Phase 1:</strong> Cool to &le;{{ phase1_target }}&deg;C (advisory 2 hours{% if timing.phase1.late_seconds > 0 %} — ran {{ (timing.phase1.late_seconds // 60) }}m {{ (timing.phase1.late_seconds % 60) }}s late{% endif %})</p>
+  <p style="margin-left:14px;color:#555">Start {{ timing.phase1.start | time_only }} &rarr; End {{ timing.phase1.end | time_only }}
+     &nbsp;|&nbsp; Elapsed {{ timing.phase1.elapsed_label }}
+     &nbsp;|&nbsp; Temp at end {{ timing.phase1.end_temp_label }}&deg;C</p>
+
+  <p><strong>Phase 2:</strong> Chill to &le;{{ phase2_target }}&deg;C within 4 hours</p>
+  <p style="margin-left:14px;color:#555">Start {{ timing.phase2.start | time_only }} &rarr; End {{ timing.phase2.end | time_only }}
+     &nbsp;|&nbsp; Elapsed {{ timing.phase2.elapsed_label }}
+     &nbsp;|&nbsp; Temp at end {{ timing.phase2.end_temp_label }}&deg;C
+     {% if phase2_note %}&nbsp;|&nbsp; {{ phase2_note }}{% endif %}</p>
+
+  <p><strong>Result:</strong> <span class="badge {{ badge_class }}">{{ result_label }}</span></p>
+
+  {% if danger_zone_alert_count > 0 %}
+  <p class="dz">{{ danger_zone_alert_count }} danger-zone alert reading(s) recorded during this session.</p>
+  {% endif %}
+</div>
+
+<button class="prtbtn noprint" onclick="window.print()">Print / Save as PDF</button>
+
+{% if segments %}
+<div class="cap">Phase timeline</div>
+<div class="tl-wrap" style="padding-left:{{ chart_margin_left_pct }}%;padding-right:{{ chart_margin_right_pct }}%">
+  <div class="tl-bar">
+    {% for seg in segments %}
+    <div class="tl-seg {{ seg.class }}" style="width:{{ '%.2f'|format(seg.width_pct) }}%"></div>
+    {% endfor %}
+  </div>
+  <div class="tl-ticks">
+    {% for label in chart.tick_label %}<span style="left:{{ '%.2f'|format((chart.tick_pct[loop.index0] - chart_margin_left_pct) / (100 - chart_margin_left_pct - chart_margin_right_pct) * 100) }}%">{{ label }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if chart %}
+<div class="cap">Probe (needle) temperature, &deg;C over elapsed time</div>
+<svg class="chart" viewBox="0 0 {{ chart_w }} {{ chart_h }}" xmlns="http://www.w3.org/2000/svg">
+  <line x1="{{ chart_x0 }}" y1="{{ chart.y_target0 }}" x2="{{ chart_x1 }}" y2="{{ chart.y_target0 }}" stroke="#aaaaaa" stroke-width="1" stroke-dasharray="4,4"></line>
+  <text x="{{ chart_x1 + 4 }}" y="{{ chart.y_target0 + 3 }}" fill="#888888" font-size="9.5">{{ cook_threshold }}&deg;C</text>
+  <line x1="{{ chart_x0 }}" y1="{{ chart.y_target1 }}" x2="{{ chart_x1 }}" y2="{{ chart.y_target1 }}" stroke="#aaaaaa" stroke-width="1" stroke-dasharray="4,4"></line>
+  <text x="{{ chart_x1 + 4 }}" y="{{ chart.y_target1 + 3 }}" fill="#888888" font-size="9.5">{{ phase1_target }}&deg;C</text>
+  <line x1="{{ chart_x0 }}" y1="{{ chart.y_target2 }}" x2="{{ chart_x1 }}" y2="{{ chart.y_target2 }}" stroke="#aaaaaa" stroke-width="1" stroke-dasharray="4,4"></line>
+  <text x="{{ chart_x1 + 4 }}" y="{{ chart.y_target2 + 3 }}" fill="#888888" font-size="9.5">{{ phase2_target }}&deg;C</text>
+  <text x="{{ chart_x0 }}" y="{{ chart_y0 - 4 }}" fill="#888888" font-size="9.5">{{ chart.y_axis_max_label }}</text>
+  <text x="{{ chart_x0 }}" y="{{ chart_y1 + 12 }}" fill="#888888" font-size="9.5">0&deg;C</text>
+  <polyline points="{{ chart.poly_points }}" fill="none" stroke="#0f6e6a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  <line x1="{{ chart_x0 }}" y1="{{ chart_y1 }}" x2="{{ chart_x1 }}" y2="{{ chart_y1 }}" stroke="#dee2e6" stroke-width="1"></line>
+</svg>
+{% endif %}
+
+<table>
+  <tr><th>Time</th><th>Needle &deg;C</th><th>Water Probe &deg;C</th><th>Air Temp &deg;C</th><th>Humidity %</th><th>Phase</th><th>Danger Zone</th></tr>
+  {% for row in rows %}
+  <tr class="{{ row.row_class }}">
+    <td>{{ row.time | time_only }}</td>
+    <td>{{ row.needle }}</td>
+    <td>{{ row.water_probe }}</td>
+    <td>{{ row.air_temp }}</td>
+    <td>{{ row.humidity }}</td>
+    <td>{{ row.phase_label }}</td>
+    <td class="{% if row.danger_zone %}dz{% endif %}">{{ row.danger_zone }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" style="text-align:center;color:#888">No compliance data recorded for this session</td></tr>
+  {% endfor %}
+</table>
+</body>
+</html>

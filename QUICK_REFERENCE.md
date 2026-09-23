@@ -614,6 +614,134 @@ psql -h 192.168.2.10 -U postgres -d jitsu_fcp  # from local machine
 
 ---
 
+## CAPM Compliance Data (in `jitsu_fcp`)
+
+CAPM (Continuous Ambient & Probe Monitor — separate product, own repo at
+`~/Documents/GitHub/CAPM`) writes automated temperature-monitoring data
+into the same `jitsu_fcp` database as this project's manual
+`temperature_log`/cooling tables, via its own ingest API (deployed
+separately in `JITSU/DATACOLLECTOR/CAPM/`). Access uses the same
+llamajail/`jitsu_fcp` connection as above — see **PostgreSQL Access**.
+
+### Relevant tables
+
+| Table | Purpose | Key columns |
+|---|---|---|
+| `capm_devices` | One row per physical device | `mac_address` (PK), `device_name`, `device_type`, `chip_model` |
+| `capm_sessions` | One row per bounded monitoring event | `id` (uuid), `mac_address`, `session_name`, `mode` (`'compliance'` \| `'continuous'`), `profile` (`chiller` \| `hot_hold` \| `log_only`), `started_at`, `ended_at`, `end_reason` |
+| `capm_readings` | One row per poll | `session_id` (nullable FK → `capm_sessions.id`), `reading_timestamp`, `readings` (jsonb), `compliance_phase`, `danger_zone_level` |
+
+`readings` jsonb shape (keys present depend on the device's sensor
+`capabilities` — absent sensors are simply missing keys, not `null`):
+
+```json
+{"dht_temp": 25.4, "ds_probe": 20.5, "kmeter_temp": 85.5, "dht_humidity": 51}
+```
+
+### List all compliance sessions
+
+```sql
+SELECT s.id, s.mac_address, d.device_name, s.session_name, s.profile,
+       s.started_at, s.ended_at, s.end_reason, count(r.id) AS reading_count
+FROM capm_sessions s
+LEFT JOIN capm_devices d ON d.mac_address = s.mac_address
+LEFT JOIN capm_readings r ON r.session_id = s.id
+WHERE s.mode = 'compliance'
+GROUP BY s.id, s.mac_address, d.device_name, s.session_name, s.profile,
+         s.started_at, s.ended_at, s.end_reason
+ORDER BY s.started_at DESC;
+```
+
+### Pull readings for one compliance session (for a report)
+
+```sql
+SELECT reading_timestamp, readings, compliance_phase, danger_zone_level
+FROM capm_readings
+WHERE session_id = '<session-uuid-from-query-above>'
+ORDER BY reading_timestamp;
+```
+
+A session is a single unbroken compliance run — it only closes when the
+device's `sd_filename` changes, never on a time boundary, so all rows for
+one `session_id` belong to the same audit event by design. `danger_zone_level`
+flags out-of-range readings inline (`ok` vs. an alert value) without
+needing to recompute thresholds client-side.
+
+### Existing report/graph — on-device, not from `jitsu_fcp`
+
+The CAPM device itself already serves a data summary report with a
+time-series graph, generated on-device from firmware RAM — a separate,
+existing feature from the DB queries above, not a gap to fill:
+
+| Route | Repo / file | What it does |
+|---|---|---|
+| `/compliance_report` | `Arduino/ESP8266/Continuous_Ambient_Probe_Monitor.ino`, `handleComplianceReport()` | Server-rendered printable HTML HACCP report (summary + PASS/FAIL badge + table) |
+| `/full_data` | same file, `handleFullDataDump()` | Full in-RAM log as JSON, feeds the "Session Report" view's Chart.js time-series graph and CSV download |
+| `/data` | same file | Live JSON snapshot; the UI polls it to detect `session_complete` and trigger the report view |
+
+**Important distinction:** the on-device report reads only the device's
+in-RAM ring buffer — the *current or just-finished* session, bounded by
+RAM (not the full SD history), and never the SD card or `jitsu_fcp`. For
+historical/cross-session reporting (comparing past compliance runs,
+longer retention, reports generated away from the device), use the
+`jitsu_fcp` queries above instead — that's the durable, centralized copy
+of the same data, and the natural place to extend FCP_DCC's own
+compliance-reporting features (`fcp_api/routers/`) to cover CAPM sessions
+alongside `temperature_log`/cooling-event reporting.
+
+Full CAPM pipeline/schema context: `CAPM/QUICK_REFERENCE.md` in the CAPM
+repo (`ai-docs/CAPM-V2-Telemetry-Schema/` there has the full spec).
+
+### HACCP compliance reports from `jitsu_fcp` (durable, cross-session)
+
+`fcp_api/routers/capm.py` + `fcp_api/services/capm_reports.py` build the
+historical/cross-session report the section above calls out as missing from
+the on-device RAM-only report. It replicates the firmware's two-phase
+cooling state machine (`ComplianceManager.h`: Cooking → Phase 1 ≤21°C
+advisory 2h → Phase 2 ≤5°C within 4h → 30-min Grace → Pass/Fail) against
+the durable `capm_sessions`/`capm_readings` rows, so a report can be
+generated for any past session, not just the one still in the device's RAM.
+
+```bash
+# List recent compliance sessions (manager+)
+GET /capm/sessions?mode=compliance&days=30
+
+# One session's structured report as JSON
+GET /capm/sessions/{session_id}/report
+
+# Same report rendered to PDF (phase timeline + temperature chart with
+# 60°C/21°C/5°C reference lines, full reading table)
+GET /capm/sessions/{session_id}/report.pdf
+```
+
+All three require the standard `X-FCP-Secret` / `X-MW-User` / `X-MW-Groups`
+headers (see **Authentication** under **FCP CRUD API** above).
+
+**Compliance verdict logic (non-obvious):** a session is scored
+`NON-COMPLIANT` if it has ended (`ended_at` set) and the last logged
+`compliance_phase` isn't `pass` — regardless of whether the firmware ever
+logged a formal `fail`/`grace` row. A session the device closes mid-Phase-2
+without a logged Grace/Fail transition still fails: the monitoring period
+ended without proof the target was reached. Only a session still open
+(`ended_at IS NULL`) reads as `IN PROGRESS`.
+
+**PDF rendering:** uses `weasyprint`, which must be installed with
+`sudo pip3 install weasyprint` on llamajail — the `fcp_api` service runs as
+**root** (via its rc.d script), so a plain `pip3 install` lands in the
+invoking user's own `~/.local` and is invisible to the running service.
+Restart after installing: `sudo service fcp_api restart`.
+
+**SVG chart note:** WeasyPrint's SVG renderer doesn't reliably apply
+external `<style>` CSS class rules to SVG shapes — style chart elements
+(`fill`, `stroke`, `stroke-width`, `stroke-dasharray`) with inline
+presentation attributes instead, or lines/polylines can render as solid
+filled shapes.
+
+Memory Bank UUID `cce01712-de1e-4363-b990-5411f5f584dd` has the full build
+history, chart/timeline design decisions, and verified test sessions.
+
+---
+
 ## Reference Materials
 
 For detailed documentation, see Memory Bank:
@@ -635,6 +763,7 @@ For detailed documentation, see Memory Bank:
 | **MPI S39-00006 Remediation** | 22f6a209-ae3b-4402-9614-523d9ccf01db | First applied fix — doc 16684 confirmed/updated; 6 docs still pending WAF-blocked verification |
 | **MPI S39-00006 Content Diff** | 364a84b9-2898-4ca4-9939-6c2da4c67d89 | Real card content changes (freezing, recontamination) — Cooling_Records fixed; Cooking_Verification/Closing_Check gaps open |
 | **MPI Check — Banner Status + Aug 29 Follow-up** | 5185ae0b-996f-429e-9591-a7d66328de6a | Banner partially cleared; cloud routines can't reach llamajail (LAN-only rule); one-time cron scheduled |
+| **CAPM Compliance Report Generator** | cce01712-de1e-4363-b990-5411f5f584dd | HACCP PDF/JSON reports from `capm_sessions`/`capm_readings`; verdict logic, chart/timeline design, weasyprint deployment notes |
 
 **To access these:**
 ```bash
