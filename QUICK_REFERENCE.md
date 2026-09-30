@@ -841,6 +841,7 @@ For detailed documentation, see Memory Bank:
 | **Low-Alcohol Stocking Requirement (s52)** | 28aed987-a1c8-40ac-977c-552bc910c318 | Mandatory: must stock a genuine 1.15-2.5% ABV product for s52 — 0% beer only covers the separate s51 non-alcoholic-range requirement, doesn't satisfy s52 |
 | **Acceptable Forms of ID (Regs 4/5/5A)** | fc64c517-8016-43e1-8c87-e866844d5ec0 | Passport, NZ driver licence, Hospitality NZ (HANZ 18+) card, or (new May 2026) an accredited digital ID credential — the old "3 forms of ID" rule is now outdated |
 | **Signs of Intoxication (s5, s248-252)** | 73563c5e-3040-48dd-bc8e-19587ffc63ba | Legal test: 2+ of appearance/behaviour/co-ordination/speech impaired; offences for selling to/allowing intoxication; s252(3) "reasonable steps" defence |
+| **Food Purchase Not Required (s14) + s47 Repeal Correction** | 88ee8e2c-cf75-47c3-babe-715bc1e93385 | No food-purchase requirement on a standard on-licence; corrects earlier note — s47 sacrosanct-days restriction was repealed April 2026, no longer applies to on-licences |
 
 **To access these:**
 ```bash
