@@ -667,6 +667,26 @@ one `session_id` belong to the same audit event by design. `danger_zone_level`
 flags out-of-range readings inline (`ok` vs. an alert value) without
 needing to recompute thresholds client-side.
 
+### Reading history through the CAPM read API
+
+For per-device history there is a read-only HTTP alternative to running
+`psql` by hand: the CAPM read API at `http://192.168.2.10:8767`. Its bearer
+token is `CAPM_READ_API_TOKEN` in the service's `.env` (never written here).
+
+```bash
+curl -H "Authorization: Bearer $CAPM_READ_API_TOKEN" "http://192.168.2.10:8767/readings?mac=AA:BB:CC:DD:EE:FF&session_id=<session-uuid>&limit=200"
+```
+
+`GET /readings?mac=<MAC>` accepts optional `limit` (max 200), `from`/`to`
+(naive facility-local time, `to` exclusive), `session_id` (from the sessions
+query above), `cursor` (page forward with the response's `next_cursor`) and
+`include=phase,danger_zone,session`. The response is
+`{mac, readings:[{ts, values}], count, truncated, next_cursor}`. It is
+read-only, returns one device per call, and allows at most 31 days per range.
+For cross-device reports, compliance summaries or anything beyond raw
+readings, keep using SQL / `fcp_api`. Details: `capm_read_api/README.md` in the
+CAPM repo.
+
 ### Existing report/graph — on-device, not from `jitsu_fcp`
 
 The CAPM device itself already serves a data summary report with a
@@ -742,6 +762,55 @@ history, chart/timeline design decisions, and verified test sessions.
 
 ---
 
+## Alcohol Licensing (Sale and Supply of Alcohol Act 2012)
+
+Separate regulatory domain from the MPI Food Control Plan — as a restaurant
+serving alcohol, an on-licence must also comply with the **Sale and Supply
+of Alcohol Act 2012** (different regulator: District Licensing Committees /
+Alcohol Regulatory and Licensing Authority (ARLA), not MPI).
+
+**Local reference copies:** `ALCOHOL_LICENSING_DOCUMENTS/` at the repo root
+(mirrors the `MPI_FCP_DOCUMENTS/` pattern — see that folder's README for the
+file index):
+- Full Act text (current reprint, from legislation.govt.nz)
+- National guidance — alcohol promotions, on-licensed premises
+- National guidance — alcohol promotions, off-licensed premises
+- National guidance — remote sales of alcohol
+- Dunedin City Council Local Alcohol Policy (LAP, in effect since Feb 2019) + summary of changes
+
+**Main online source:** https://resources.alcohol.org.nz/alcohol-management-laws/nz-alcohol-laws/sale-and-supply-of-alcohol-act-2012
+
+**Dunedin-specific rule (the one that actually governs day-to-day trading):**
+on-licence restaurants/cafés in non-residential areas — **Mon–Sun, 8am to
+1am the following day**, no one-way door requirement (hotels/taverns get
+8am–3am with a 2:30am one-way door instead; residential-area on-licences
+are tighter: 9am–11pm Sun–Thu, 9am–midnight Fri/Sat). DCC's DLC can also
+impose discretionary conditions (BYO management, outdoor seating, CCTV,
+a Premises Management Plan for intoxication/multi-drink management) under
+Act sections 110/117. A DCC LAP review started in 2024 is still in early
+consultation as of March 2026 — the 2019 LAP above remains in force;
+re-check periodically.
+
+**Fetch gotchas:**
+- `resources.alcohol.org.nz` sits behind a CloudFront WAF that 403s a plain
+  `curl` request — add a `Referer` header set to the source page above.
+- `dunedin.govt.nz` sits behind a full Cloudflare JS challenge — headers
+  don't help; use the `claude-in-chrome` browser extension instead (see
+  Memory Bank entry below for the working procedure, incl. the download
+  gotcha where only one synthetic download per page load succeeds).
+  legislation.govt.nz needs neither workaround.
+
+Memory Bank UUID `2248742a-3892-41ac-8c7e-4f5506fdfb8d` has the national
+Act decision rationale, document source URLs, and key licensing points.
+Memory Bank UUID `122c5d14-74b4-4077-9437-59b8e8f4b9e5` has the Dunedin LAP
+detail (full trading-hours table, discretionary conditions, browser-fetch
+procedure).
+
+**Status:** Reference-material stage only — no MediaWiki pages, SMW
+properties, or FCP API endpoints built for this yet.
+
+---
+
 ## Reference Materials
 
 For detailed documentation, see Memory Bank:
@@ -764,6 +833,14 @@ For detailed documentation, see Memory Bank:
 | **MPI S39-00006 Content Diff** | 364a84b9-2898-4ca4-9939-6c2da4c67d89 | Real card content changes (freezing, recontamination) — Cooling_Records fixed; Cooking_Verification/Closing_Check gaps open |
 | **MPI Check — Banner Status + Aug 29 Follow-up** | 5185ae0b-996f-429e-9591-a7d66328de6a | Banner partially cleared; cloud routines can't reach llamajail (LAN-only rule); one-time cron scheduled |
 | **CAPM Compliance Report Generator** | cce01712-de1e-4363-b990-5411f5f584dd | HACCP PDF/JSON reports from `capm_sessions`/`capm_readings`; verdict logic, chart/timeline design, weasyprint deployment notes |
+| **Alcohol Licensing Documents Setup** | 2248742a-3892-41ac-8c7e-4f5506fdfb8d | Sale and Supply of Alcohol Act 2012 folder decision, source URLs, on-licence licensing points, WAF fetch gotcha |
+| **Dunedin Local Alcohol Policy (LAP)** | 122c5d14-74b4-4077-9437-59b8e8f4b9e5 | Local trading-hours table by premises type, discretionary conditions (BYO/outdoor seating/CCTV/Premises Management Plan), Cloudflare browser-fetch procedure |
+| **Duty Manager Absence — Brief Errands** | bcc4e7db-6c3e-41eb-978c-c286da43cb84 | Sole certificated manager stepping out briefly (e.g. stock run) — s214/215/229/230 analysis: pause sales, no temp-manager appointment needed for short gaps |
+| **Acting Manager — Multi-Week Holiday** | 7d6dc234-59ea-4728-932f-6166d9fccaec | s230 acting manager procedure for a 3-week holiday: appointment, mandatory notice (s231), DLC objection window, record-keeping (s232), 6-week/12-month aggregate cap |
+| **Zero/0% Alcohol Beer** | 18654822-767c-4ff4-80c0-4b332bcb1964 | 1.15% ethanol threshold (s5) below which a product isn't "alcohol" under the Act at all — no licence/manager/hours/age rules apply; label vs. actual-content caveat |
+| **Low-Alcohol Stocking Requirement (s52)** | 28aed987-a1c8-40ac-977c-552bc910c318 | Mandatory: must stock a genuine 1.15-2.5% ABV product for s52 — 0% beer only covers the separate s51 non-alcoholic-range requirement, doesn't satisfy s52 |
+| **Acceptable Forms of ID (Regs 4/5/5A)** | fc64c517-8016-43e1-8c87-e866844d5ec0 | Passport, NZ driver licence, Hospitality NZ (HANZ 18+) card, or (new May 2026) an accredited digital ID credential — the old "3 forms of ID" rule is now outdated |
+| **Signs of Intoxication (s5, s248-252)** | 73563c5e-3040-48dd-bc8e-19587ffc63ba | Legal test: 2+ of appearance/behaviour/co-ordination/speech impaired; offences for selling to/allowing intoxication; s252(3) "reasonable steps" defence |
 
 **To access these:**
 ```bash
